@@ -7,9 +7,11 @@ import net.thedanpage.worldshardestgame.controllers.GeneticController;
 import java.io.File;
 import java.util.ArrayList;
 
+import static net.thedanpage.worldshardestgame.Sound.BACKGROUND;
+
 public class Main {
     public static void main(String[] args) {
-        //MusicPlayer.start();
+        MusicPlayer.play(BACKGROUND);
 
         var player = new Player();
         var controller = new GeneticController();

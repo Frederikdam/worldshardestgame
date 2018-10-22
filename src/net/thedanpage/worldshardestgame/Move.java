@@ -5,5 +5,9 @@ public enum Move {
     LEFT,
     DOWN,
     RIGHT,
+    RIGHTDOWN,
+    RIGHTUP,
+    LEFTDOWN,
+    LEFTUP,
     NEUTRAL
 }

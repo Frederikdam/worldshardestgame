@@ -58,9 +58,9 @@ public class Game extends JPanel implements ActionListener {
 
     public List<Player> population = new ArrayList<>();
 
-    public int populationSize = 50;
+    public int populationSize = 100;
 
-    private int playerMoveCount = 500;
+    private int playerMoveCount = 10;
 
     private int generation = 1;
 
@@ -82,13 +82,7 @@ public class Game extends JPanel implements ActionListener {
         intializePopulation();
     }
 
-    public void updateFitness() {
-        for(var player : population) {
-            player.fitness = calculateFitness(player);
-        }
-    }
-
-    private double calculateFitness(Player player) {
+    public double calculateFitness(Player player) {
         return currentLevel.getDistanceToGoal(player);
     }
 
@@ -112,7 +106,8 @@ public class Game extends JPanel implements ActionListener {
     }
 
     private void advanceToNextLevel() {
-        currentLevel = levels.get(currentLevelIndex++);
+        if(currentLevelIndex == levels.size()) System.exit(0);
+        currentLevel = levels.get(++currentLevelIndex);
         for (var player : population) {
             player.reset();
         }
@@ -200,9 +195,9 @@ public class Game extends JPanel implements ActionListener {
 
     public void evaluateGeneration() {
         this.generation++;
-        updateFitness();
+        //updateFitness();
         if(this.generation % 5 == 0) {
-            this.playerMoveCount += 50;
+            if (this.playerMoveCount < 5000) this.playerMoveCount *= 1.2;
         }
 
         var bestCandidates = selection();

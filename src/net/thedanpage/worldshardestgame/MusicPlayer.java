@@ -4,18 +4,24 @@ import kuusisto.tinysound.Music;
 import kuusisto.tinysound.TinySound;
 
 public class MusicPlayer {
+    public static void play(Sound sound) {
+        TinySound.init();
+        TinySound.loadSound(Player.class.getClassLoader()
+                .getResource(sound.getUrl())).play();
+    }
+}
 
-    static Thread bgMusic = new Thread() {
-        public void run() {
-            TinySound.init();
-            Music bgmusic = TinySound.loadMusic(ClassLoader.getSystemResource(
-                    "net/thedanpage/worldshardestgame/resources/music.ogg"));
-            bgmusic.play(true);
-        }
-    };
+enum Sound {
+    BACKGROUND("net/thedanpage/worldshardestgame/resources/music.ogg"),
+    COIN("net/thedanpage/worldshardestgame/resources/ding.wav");
 
-    public static void start() {
-        bgMusic.start();
-        bgMusic.run();
+    private String url;
+
+    Sound(String url) {
+        this.url = url;
+    }
+
+    public String getUrl() {
+        return url;
     }
 }

@@ -14,6 +14,8 @@ import kuusisto.tinysound.TinySound;
 import net.thedanpage.worldshardestgame.controllers.Controller;
 import net.thedanpage.worldshardestgame.controllers.ExampleController;
 
+import static net.thedanpage.worldshardestgame.Sound.COIN;
+
 public class Player {
 
 	/** The X coordinate of the player. */
@@ -28,6 +30,7 @@ public class Player {
 	 */
 	private int snapX;
 
+	private int moveFactor = 3;
 
 	/**
 	 * The Y coordinate of the player, snapped to the grid of 40x40 tiles.
@@ -47,9 +50,6 @@ public class Player {
 	/** True if the player is colliding with a tile to their right. */
 	private boolean collidingRight;
 
-	/** The smack sound. */
-	Sound smack;
-
 	/** The number of times the player has died. */
 	private int deaths;
 
@@ -65,7 +65,7 @@ public class Player {
 
 	public int nextMoveIndex = 0;
 
-	private double mutationRate = 0.1;
+	private double mutationRate = 0.05;
 
 	public double fitness = 0;
 
@@ -293,9 +293,7 @@ public class Player {
 					coin.collected = true;
 
 					//Coin sound
-					TinySound.init();
-					TinySound.loadSound(Player.class.getClassLoader()
-							.getResource("net/thedanpage/worldshardestgame/resources/ding.wav")).play();
+					MusicPlayer.play(COIN);
 				}
 			}
 		}
@@ -331,7 +329,6 @@ public class Player {
 				if (this.collidesWith(dot.getBounds())) {
 					this.deaths ++;
 					this.dead = true;
-
 					/*if (!Game.muted) {
 						//Play the smack sound
 						TinySound.init();
@@ -341,23 +338,54 @@ public class Player {
 				}
 			}
 		}
+		if(this.dead) { this.fitness = game.calculateFitness(this); }
 	}
 
+	public void moveLeft() {
+		if(!collidingLeft) this.x-=moveFactor;
+	}
 
+	public void moveRight() {
+		if(!collidingRight) this.x+=moveFactor;
+	}
+
+	public void moveDown() {
+		if(!collidingDown) this.y+=moveFactor;
+	}
+
+	public void moveUp() {
+		if(!collidingUp) this.y-=moveFactor;
+	}
 
 	public void move(Move move) {
 		switch (move) {
 			case LEFT:
-				if(!collidingLeft) this.x-=1;
+				moveLeft();
 				break;
 			case RIGHT:
-				if(!collidingRight) this.x+=1;
+				moveRight();
 				break;
 			case DOWN:
-				if(!collidingDown) this.y+=1;
+				moveDown();
 				break;
 			case UP:
-				if(!collidingUp) this.y-=1;
+				moveUp();
+				break;
+			case LEFTUP:
+				moveLeft();
+				moveUp();
+				break;
+			case LEFTDOWN:
+				moveLeft();
+				moveDown();
+				break;
+			case RIGHTUP:
+				moveRight();
+				moveUp();
+				break;
+			case RIGHTDOWN:
+				moveRight();
+				moveDown();
 				break;
 			case NEUTRAL:
 				break;
