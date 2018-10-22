@@ -348,16 +348,16 @@ public class Player {
 	public void move(Move move) {
 		switch (move) {
 			case LEFT:
-				if(!collidingLeft) this.x-=3;
+				if(!collidingLeft) this.x-=1;
 				break;
 			case RIGHT:
-				if(!collidingRight) this.x+=3;
+				if(!collidingRight) this.x+=1;
 				break;
 			case DOWN:
-				if(!collidingDown) this.y+=3;
+				if(!collidingDown) this.y+=1;
 				break;
 			case UP:
-				if(!collidingUp) this.y-=3;
+				if(!collidingUp) this.y-=1;
 				break;
 			case NEUTRAL:
 				break;

@@ -48,87 +48,38 @@ import static java.lang.Thread.sleep;
 
 public class Game extends JPanel implements ActionListener {
 
-    /** An instance of the game. */
-    private static Game game;
-
-    /** The timer used for the game's clock. */
-    private Timer t = new Timer(5, this);
-
-    /** Used for logging information during the game. */
-    public final static Logger logger = Logger.getLogger(Game.class.getName());
-
-    static String logFilePath = System.getProperty("user.home")
-            + "/worldshardestgame/logs/" +  new SimpleDateFormat("YY-MM-dd").format(new Date()) + ".log";
-
-    private static final long serialVersionUID = 1L;
-
-    /** The frame that the panel goes in. */
-    public static JFrame frame = new JFrame();
-
-    /** The enum instance used for switching the state of the game. */
-    static final int INTRO = 0, MAIN_MENU = 1, LEVEL_TITLE = 2, LEVEL = 3;
-
-    /** The integer used for the game state. */
-    static int gameState = MAIN_MENU;
-
-    /** Used for when the instructions should be shown. */
-    private boolean showIntro = false;
-
     public Controller controller;
 
-    /** This is the level that the player is on. */
-    static int levelNum = 0;
-
     private boolean replay = true;
+
+    private Timer t = new Timer(5, this);
+
     private int replayLevel = 1;
 
     public List<Player> population = new ArrayList<>();
 
     public int populationSize = 50;
+
     private int playerMoveCount = 500;
 
     private int generation = 1;
 
-    /** The data of the current level. This should be given data in initLevel(). */
-    public static GameLevel level = new GameLevel();
+    boolean running = false;
 
-    /** Controls whether the game has sound or not. */
-    static boolean muted = false;
+    private Player player;
 
-    /** Background music. */
-    static Thread bgMusic = new Thread() {
-        public void run() {
-            TinySound.init();
-            Music bgmusic = TinySound.loadMusic(ClassLoader.getSystemResource(
-                    "net/thedanpage/worldshardestgame/resources/music.ogg"));
-            bgmusic.play(true);
-        }
-    };
+    private ArrayList<GameLevel> levels;
 
-    Thread endIntro = new Thread() {
-        public void run() {
-            try {
-                sleep(1500);
-            } catch (InterruptedException e) {
-                TextFileWriter.appendToFile(logFilePath, e.getMessage());
-            }
-            gameState = MAIN_MENU;
-            easyLog(logger, Level.INFO, "Game state set to MAIN_MENU");
-        }
-    };
+    private int currentLevelIndex = 0;
 
-    static boolean doLogging = false;
+    private GameLevel currentLevel;
 
-    private static int totalLevels = 0;
-
-
-    public Game(Controller controller) {
+    public Game(Controller controller, Player player, ArrayList<GameLevel> levels) {
         this.controller = controller;
+        this.player = player;
+        this.levels = levels;
+        this.currentLevel = levels.get(currentLevelIndex);
         intializePopulation();
-    }
-
-    public GameLevel getLevel() {
-        return level;
     }
 
     public void updateFitness() {
@@ -138,9 +89,8 @@ public class Game extends JPanel implements ActionListener {
     }
 
     private double calculateFitness(Player player) {
-        return level.getDistanceToGoal(player);
+        return currentLevel.getDistanceToGoal(player);
     }
-
 
     public void paintComponent(final Graphics g) {
         super.paintComponent(g);
@@ -148,7 +98,6 @@ public class Game extends JPanel implements ActionListener {
         update(g);
         render(g);
 
-        //Start the timer
         t.start();
 
         Toolkit.getDefaultToolkit().sync();
@@ -163,20 +112,16 @@ public class Game extends JPanel implements ActionListener {
     }
 
     private void advanceToNextLevel() {
-        levelNum++;
+        currentLevel = levels.get(currentLevelIndex++);
         for (var player : population) {
             player.reset();
-            level.init(player, levelNum);
         }
-        gameState = LEVEL;
-        easyLog(logger, Level.INFO, "Game state set to LEVEL");
-
         replay = true;
     }
 
     private void advanceToReplay(Player winnerPlayer) {
-        if (replayLevel != levelNum) {
-            replayLevel = levelNum;
+        if (replayLevel != currentLevel.getLevelNum()) {
+            replayLevel = currentLevel.getLevelNum();
             for (var player : population) {
                 player.goalReached = false;
                 player.setDead(true);
@@ -185,12 +130,11 @@ public class Game extends JPanel implements ActionListener {
         }
         Player replayPlayer = winnerPlayer;
         replayPlayer.reset();
-        replayPlayer.respawn(level);
+        replayPlayer.respawn(currentLevel);
         replayPlayer.setMoves(winnerPlayer.getMoves());
         replayPlayer.goalReached = false;
         replayPlayer.nextMoveIndex = 0;
 
-        level.init(replayPlayer, levelNum);
         replay = false;
     }
 
@@ -201,20 +145,14 @@ public class Game extends JPanel implements ActionListener {
      * @param g
      * */
     public void update(Graphics g) {
-        if (gameState == MAIN_MENU) {
-            showIntro = false;
-            gameState = LEVEL_TITLE;
-            easyLog(logger, Level.INFO, "Game state set to LEVEL_TITLE");
-            levelNum = 1;
+        if(running) return;
 
-            for (var player : population) {
-                player.reset();
-                level.init(player, levelNum);
-            }
-
-            gameState = LEVEL;
-            easyLog(logger, Level.INFO, "Game state set to LEVEL");
+        for (var player : population) {
+            player.reset();
+            player.respawn(currentLevel);
         }
+
+        running = true;
     }
 
     /** Draw the game's graphics.
@@ -226,14 +164,10 @@ public class Game extends JPanel implements ActionListener {
         var isGoalReached = false;
         Player winnerPlayer = null;
 
-        if (levelNum == 0) {
-            g.dispose();
-            return;
-        }
-        level.drawTiles(g);
-        level.drawCoins(g);
-        level.drawDots(g);
-        level.updateDots();
+        currentLevel.drawTiles(g);
+        currentLevel.drawCoins(g);
+        currentLevel.drawDots(g);
+        currentLevel.updateDots();
 
         for (var player : population) {
             if(player.isDead()) deadPlayerCount++;
@@ -260,7 +194,7 @@ public class Game extends JPanel implements ActionListener {
         g.setColor(Color.WHITE);
         g.setFont(new Font("Tahoma", Font.BOLD, 18));
         drawRightJustifiedString("Generation: " + this.generation, 750, 17, g);
-        drawCenteredString(levelNum + "/" + totalLevels, 400, 17, g);
+        drawCenteredString(currentLevel.getLevelNum() + "/" + levels.size(), 400, 17, g);
         g.dispose();
     }
 
@@ -274,9 +208,9 @@ public class Game extends JPanel implements ActionListener {
         var bestCandidates = selection();
         var newPopulation = mutate(bestCandidates);
         population = newPopulation;
-        level.reset();
+        currentLevel.reset();
         for(Player player : population) {
-            player.respawn(level);
+            player.respawn(currentLevel);
         }
 
         System.out.println("Fitness: " + bestCandidates.get(0).fitness + " MoveCount: " + bestCandidates.get(0).getMoves().length);
@@ -307,6 +241,8 @@ public class Game extends JPanel implements ActionListener {
         return children;
     }
 
+    public GameLevel getLevel() { return currentLevel; }
+
     public void actionPerformed(ActionEvent arg0) {
         repaint();
     }
@@ -317,63 +253,11 @@ public class Game extends JPanel implements ActionListener {
         g.drawString(s, x, h);
     }
 
-    private void drawCenteredString(String s, int w, int h, Graphics2D g2) {
-        FontMetrics fm = g2.getFontMetrics();
-        int x = (w*2 - fm.stringWidth(s)) / 2;
-        g2.drawString(s, x, h);
-    }
-
     private void drawRightJustifiedString(String s, int w, int h, Graphics g) {
         FontMetrics fm = g.getFontMetrics();
         int x = (w - fm.stringWidth(s));
         g.drawString(s, x, h);
     }
-
-    /** Draw the outline of a string of text.
-     *
-     * @param text
-     * 		the text to be drawn
-     * @param x
-     * 		the x coordinate of the text
-     * @param y
-     * 		the y coordinate of the text
-     * @param thickness
-     * 		the thickness of the outline
-     * @param g2
-     * 		the 2D graphics the text will be drawn with
-     */
-    private void drawTextOutline(String text, int x, int y, int thickness, Graphics2D g2) {
-        TextLayout tl = new TextLayout(text, g2.getFont(), new FontRenderContext(null,false,false));
-        AffineTransform textAt = new AffineTransform();
-        textAt.translate(x, y);
-        g2.setStroke(new BasicStroke(thickness));
-        g2.draw(tl.getOutline(textAt));
-        g2.setStroke(new BasicStroke());
-    }
-
-
-
-
-
-    /** Draw a string, with the use of \n implemented.
-     *
-     * @param text
-     * 		the text to be drawn
-     * @param x
-     * 		the x coordinate of the text
-     * @param y
-     * 		the y coordinate of the text
-     * @param g
-     * 		the graphics the text will be drawn with
-     */
-    private void drawString(String text, int x, int y, Graphics g) {
-        for (String line : text.split("\n"))
-            g.drawString(line, x, y += g.getFontMetrics().getHeight());
-    }
-
-
-
-
 
     /**
      * Convert an exception to a String with full stack trace
@@ -401,76 +285,9 @@ public class Game extends JPanel implements ActionListener {
         }
     }
 
-    /**
-     * Easily log a string of text, and write it to the log file
-     *
-     * @param logger
-     * 		The logger for the string to be logged with
-     * @param level
-     * 		The level of the logger
-     * @param s
-     * 		The string of text to be logged
-     */
-    static void easyLog(Logger logger, Level level, String s) {
-        if (doLogging) {
-            logger.setLevel(level);
-
-            if (level == Level.CONFIG) logger.config(s);
-            else if (level == Level.FINE) logger.fine(s);
-            else if (level == Level.FINER) logger.finer(s);
-            else if (level == Level.FINEST) logger.finest(s);
-            else if (level == Level.INFO) logger.info(s);
-            else if (level == Level.SEVERE) logger.severe(s);
-            else if (level == Level.WARNING) logger.warning(s);
-
-            else {
-                logger.setLevel(Level.WARNING);
-                logger.warning("Logging error");
-            }
-
-            TextFileWriter.appendToFile(logFilePath, new SimpleDateFormat(
-                    "MMM dd, YYYY h:mm:ss a").format(new Date())
-                    + " net.thedanpage.worldshardestgame easyLog\n" + level + ": " + s);
-        }
-    }
-
-    public static void loadLevels() {
-        try {
-            while (new File(ClassLoader
-                    .getSystemResource("net/thedanpage/worldshardestgame/resources/maps/level_" + (totalLevels+1) + ".txt").toURI())
-                    .exists()) {
-                totalLevels++;
-            }
-        } catch (Exception e) {
-            System.out.println("Total levels: " + totalLevels);
-        }
-    }
-
-    public static void setupFrame() {
-        frame.setTitle("World's Hardest Game");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(new Dimension(800, 622));
-        frame.setResizable(false);
-        frame.setLocationRelativeTo(null);
-        frame.setIconImage(new ImageIcon(ClassLoader.getSystemResource("net/thedanpage/worldshardestgame/resources/favicon.png")).getImage());
-    }
-
     private void intializePopulation() {
         for (var i = 0; i < populationSize; i++) {
             population.add(new Player(playerMoveCount));
         }
-    }
-
-    public static void main(String[] args) {
-        TinySound.init();
-        loadLevels();
-        setupFrame();
-
-        bgMusic.start();
-
-        var controller = new GeneticController();
-        game = new Game(controller);
-        frame.add(game);
-        frame.setVisible(true);
     }
 }
