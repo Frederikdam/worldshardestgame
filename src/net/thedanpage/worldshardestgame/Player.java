@@ -491,9 +491,6 @@ public class Player {
 	}
 
 
-
-
-
 	@Override
 	public String toString() {
 		return "Player [x=" + x + ", y=" + y + ", snapX=" + snapX + ", snapY="

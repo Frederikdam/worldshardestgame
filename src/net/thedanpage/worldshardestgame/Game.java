@@ -60,7 +60,7 @@ public class Game extends JPanel implements ActionListener {
 
     public int populationSize = 100;
 
-    private int playerMoveCount = 10;
+    private int playerMoveCount = 200;
 
     private int generation = 1;
 
@@ -98,10 +98,14 @@ public class Game extends JPanel implements ActionListener {
     }
 
     public void goalReached(Player winnerPlayer) {
-        if (!replay) {
-            advanceToNextLevel();
-        } else {
+        if (replay) {
             advanceToReplay(winnerPlayer);
+            replay = false;
+            System.out.println("replay");
+        } else {
+            advanceToNextLevel();
+            replay = true;
+            System.out.println("!replay");
         }
     }
 
@@ -110,27 +114,22 @@ public class Game extends JPanel implements ActionListener {
         currentLevel = levels.get(++currentLevelIndex);
         for (var player : population) {
             player.reset();
+            player.respawn(currentLevel);
         }
-        replay = true;
     }
 
     private void advanceToReplay(Player winnerPlayer) {
-        if (replayLevel != currentLevel.getLevelNum()) {
-            replayLevel = currentLevel.getLevelNum();
-            for (var player : population) {
-                player.goalReached = false;
-                player.setDead(true);
-            }
-            return;
+        for (var player : population) {
+            player.goalReached = false;
+            player.setDead(true);
         }
+
         Player replayPlayer = winnerPlayer;
         replayPlayer.reset();
         replayPlayer.respawn(currentLevel);
         replayPlayer.setMoves(winnerPlayer.getMoves());
         replayPlayer.goalReached = false;
         replayPlayer.nextMoveIndex = 0;
-
-        replay = false;
     }
 
 
@@ -170,6 +169,7 @@ public class Game extends JPanel implements ActionListener {
             player.update(this, controller);
 
             if (player.goalReached) {
+                player.goalReached = false;
                 winnerPlayer = player;
                 isGoalReached = true;
                 break;
@@ -208,7 +208,7 @@ public class Game extends JPanel implements ActionListener {
             player.respawn(currentLevel);
         }
 
-        System.out.println("Fitness: " + bestCandidates.get(0).fitness + " MoveCount: " + bestCandidates.get(0).getMoves().length);
+        //System.out.println("Fitness: " + bestCandidates.get(0).fitness + " MoveCount: " + bestCandidates.get(0).getMoves().length);
     }
 
     public List<Player> selection() {
