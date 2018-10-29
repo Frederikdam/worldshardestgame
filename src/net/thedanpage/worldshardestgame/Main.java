@@ -14,7 +14,7 @@ import static net.thedanpage.worldshardestgame.Sound.BACKGROUND;
 
 public class Main {
     public static void main(String[] args) {
-        run(1, false, false, true);
+        run(1, true, false, true);
     }
 
     public static boolean levelExists(int levelNumber) {
