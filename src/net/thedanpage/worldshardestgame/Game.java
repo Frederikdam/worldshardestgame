@@ -53,31 +53,33 @@ public class Game extends JPanel implements ActionListener {
 
     private boolean replay = true;
 
-    private Timer t = new Timer(5, this);
+    public Timer t = new Timer(5, this);
 
     public List<Player> population = new ArrayList<>();
 
     public int populationSize = 100;
 
-    private int playerMoveCount = 200;
+    public Player winningPlayer = null;
+
+    private int playerMoveCount = 10;
 
     private int generation = 1;
 
-    private boolean goalReached = false;
+    public boolean goalReached = false;
 
     boolean running = false;
 
-    private Player player;
+    private Player currentPlayer;
 
     private ArrayList<GameLevel> levels;
 
     private int currentLevelIndex = 0;
 
-    private GameLevel currentLevel;
+    public GameLevel currentLevel;
 
-    public Game(Controller controller, Player player, ArrayList<GameLevel> levels) {
+    public Game(Controller controller, Player currentPlayer, ArrayList<GameLevel> levels) {
         this.controller = controller;
-        this.player = player;
+        this.currentPlayer = currentPlayer;
         this.levels = levels;
         this.currentLevel = levels.get(currentLevelIndex);
         intializePopulation();
@@ -119,7 +121,7 @@ public class Game extends JPanel implements ActionListener {
         goalReached = false;
     }
 
-    private void advanceToReplay(Player winnerPlayer) {
+    public void advanceToReplay(Player winnerPlayer) {
         for (var player : population) {
             goalReached = false;
             player.setDead(true);
@@ -158,15 +160,14 @@ public class Game extends JPanel implements ActionListener {
 
         currentLevel.drawTiles(g);
         currentLevel.drawCoins(g);
-        currentLevel.updateDots();
+        advanceDots(currentLevel);
         currentLevel.drawDots(g);
 
-
         for (var player : population) {
+            var nextMove = controller.getMove(this, player);
+            advancePlayer(nextMove, currentLevel, player);
             if(player.isDead()) deadPlayerCount++;
             player.draw(g);
-            var nextMove = controller.getMove(this, player);
-            advanceGame(nextMove, player, currentLevel);
         }
 
         if(deadPlayerCount == populationSize) {
@@ -188,10 +189,10 @@ public class Game extends JPanel implements ActionListener {
 
     public void advanceGame(Move move, Player player, GameLevel level) {
         advancePlayer(move, level, player);
-        //advanceDots(level);
+        advanceDots(level);
     }
 
-    private void advanceDots(GameLevel level) {
+    public void advanceDots(GameLevel level) {
         level.updateDots();
     }
 
@@ -214,6 +215,7 @@ public class Game extends JPanel implements ActionListener {
                 for (Tile t : level.getTileMap()) {
                     if (t.getType() == 3 && player.collidesWith(t.getBounds())) {
                         goalReached = true;
+                        winningPlayer = player;
                     }
                 }
             }
@@ -232,11 +234,11 @@ public class Game extends JPanel implements ActionListener {
             for (Dot dot : level.dots) {
                 if (player.collidesWith(dot.getBounds())) {
                     player.setDead(true);
+                    player.opacity = 0;
                 }
             }
-        } else {
-            player.fitness = calculateFitness(player);
         }
+        if (player.isDead()) player.fitness = calculateFitness(player);
     }
 
     public void advancePlayer(Move move, GameLevel level, Player player) {
@@ -263,7 +265,7 @@ public class Game extends JPanel implements ActionListener {
             player.respawn(currentLevel);
         }
 
-        //System.out.println("Fitness: " + bestCandidates.get(0).fitness + " MoveCount: " + bestCandidates.get(0).getMoves().length);
+        System.out.println("Fitness: " + bestCandidates.get(0).fitness + " MoveCount: " + bestCandidates.get(0).getMoves().length);
     }
 
     public List<Player> selection() {

@@ -48,7 +48,7 @@ public class Player {
 
 	public int nextMoveIndex = 0;
 
-	private double mutationRate = 0.05;
+	private double mutationRate = 0.01;
 
 	public double fitness = 0;
 
@@ -223,7 +223,7 @@ public class Player {
 	}
 
 	boolean collidesWith(Shape other) {
-	    return this.getBounds().getBounds2D().intersects(other.getBounds2D());
+		return this.getBounds().getBounds2D().intersects(other.getBounds2D());
 	}
 
 	public void moveLeft(GameLevel level) {
