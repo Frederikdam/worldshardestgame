@@ -24,19 +24,7 @@ public class Player {
 	/** The Y coordinate of the player. */
 	private int y;
 
-	/**
-	 * The X coordinate of the player, snapped to the grid of 40x40 tiles.
-	 * snapX = x/40
-	 */
-	private int snapX;
-
 	private int moveFactor = 3;
-
-	/**
-	 * The Y coordinate of the player, snapped to the grid of 40x40 tiles.
-	 * snapY = y/40
-	 */
-	private int snapY;
 
 	/** True if the player is colliding with a tile above them. */
 	private boolean collidingUp;
@@ -50,16 +38,11 @@ public class Player {
 	/** True if the player is colliding with a tile to their right. */
 	private boolean collidingRight;
 
-	/** The number of times the player has died. */
-	private int deaths;
-
 	/** True if the player has been hit and is not allowed to move. */
 	private boolean dead;
 
 	/** The opacity of the player. */
 	public double opacity;
-
-	public boolean goalReached = false;
 
 	private Move[] moves;
 
@@ -81,13 +64,10 @@ public class Player {
 	public Player() {
 		this.x = 400;
 		this.y = 300;
-		this.snapX = x/40;
-		this.snapY = y/40;
 		this.collidingUp = false;
 		this.collidingDown = false;
 		this.collidingLeft = false;
 		this.collidingRight = false;
-		this.deaths = 0;
 		this.dead = false;
 		this.opacity = 255;
 	}
@@ -95,13 +75,10 @@ public class Player {
 	public Player(int moveCount) {
 		this.x = 400;
 		this.y = 300;
-		this.snapX = x/40;
-		this.snapY = y/40;
 		this.collidingUp = false;
 		this.collidingDown = false;
 		this.collidingLeft = false;
 		this.collidingRight = false;
-		this.deaths = 0;
 		this.dead = false;
 		this.opacity = 255;
 
@@ -197,70 +174,6 @@ public class Player {
 		return new Rectangle(this.x - 15, this.y - 15, 28, 28);
 	}
 
-
-
-
-
-	void checkCollisionUp(GameLevel level) {
-		if (getRelativeTile(level, this.x - 14, this.y + 24, 0, -1) != null &&
-				getRelativeTile(level, this.x - 14, this.y + 24, 0, -1).getType() == 0 ||
-				getRelativeTile(level, this.x + 15, this.y + 24, 0, -1) != null &&
-				getRelativeTile(level, this.x + 15, this.y + 24, 0, -1).getType() == 0) {
-			this.collidingUp = true;
-			return;
-		}
-		this.collidingUp = false;
-	}
-
-
-
-
-
-	void checkCollisionDown(GameLevel level) {
-		if (getRelativeTile(level, this.x - 14, this.y - 27, 0, 1) != null &&
-				getRelativeTile(level, this.x - 14, this.y - 27, 0, 1).getType() == 0 ||
-				getRelativeTile(level, this.x + 15, this.y - 27, 0, 1) != null &&
-				getRelativeTile(level, this.x + 15, this.y - 27, 0, 1).getType() == 0) {
-			this.collidingDown = true;
-			return;
-		}
-		this.collidingDown = false;
-	}
-
-
-
-
-
-	void checkCollisionLeft(GameLevel level) {
-		if (getRelativeTile(level, this.x + 24, this.y - 15, -1, 0) != null &&
-				getRelativeTile(level, this.x + 24, this.y - 15, -1, 0).getType() == 0 ||
-				getRelativeTile(level, this.x + 24, this.y + 14, -1, 0) != null &&
-				getRelativeTile(level, this.x + 24, this.y + 14, -1, 0).getType() == 0) {
-			this.collidingLeft = true;
-			return;
-		}
-		this.collidingLeft = false;
-	}
-
-
-
-
-
-	void checkCollisionRight(GameLevel level) {
-		if (getRelativeTile(level, this.x - 27, this.y - 15, 1, 0) != null &&
-				getRelativeTile(level, this.x - 27, this.y - 15, 1, 0).getType() == 0 ||
-				getRelativeTile(level, this.x - 27, this.y + 15, 1, 0) != null &&
-				getRelativeTile(level, this.x - 27, this.y + 15, 1, 0).getType() == 0) {
-			this.collidingRight = true;
-			return;
-		}
-		this.collidingRight = false;
-	}
-
-
-
-
-
 	void respawn(GameLevel level) {
 		this.x = level.getSpawnPoint().x;
 		this.y = level.getSpawnPoint().y;
@@ -269,123 +182,95 @@ public class Player {
 		}
 	}
 
+	boolean checkCollisionUp(GameLevel level) {
+		if (getRelativeTile(level, this.x - 14, this.y + 24, 0, -1) != null &&
+				getRelativeTile(level, this.x - 14, this.y + 24, 0, -1).getType() == 0 ||
+				getRelativeTile(level, this.x + 15, this.y + 24, 0, -1) != null &&
+						getRelativeTile(level, this.x + 15, this.y + 24, 0, -1).getType() == 0) {
+			return true;
+		}
+		return false;
+	}
 
+	boolean checkCollisionDown(GameLevel level) {
+		if (getRelativeTile(level, this.x - 14, this.y - 27, 0, 1) != null &&
+				getRelativeTile(level, this.x - 14, this.y - 27, 0, 1).getType() == 0 ||
+				getRelativeTile(level, this.x + 15, this.y - 27, 0, 1) != null &&
+						getRelativeTile(level, this.x + 15, this.y - 27, 0, 1).getType() == 0) {
+			return true;
+		}
+		return false;
+	}
 
+	boolean checkCollisionLeft(GameLevel level) {
+		if (getRelativeTile(level, this.x + 24, this.y - 15, -1, 0) != null &&
+				getRelativeTile(level, this.x + 24, this.y - 15, -1, 0).getType() == 0 ||
+				getRelativeTile(level, this.x + 24, this.y + 14, -1, 0) != null &&
+						getRelativeTile(level, this.x + 24, this.y + 14, -1, 0).getType() == 0) {
+			return true;
+		}
+		return false;
+	}
 
+	boolean checkCollisionRight(GameLevel level) {
+		if (getRelativeTile(level, this.x - 27, this.y - 15, 1, 0) != null &&
+				getRelativeTile(level, this.x - 27, this.y - 15, 1, 0).getType() == 0 ||
+				getRelativeTile(level, this.x - 27, this.y + 15, 1, 0) != null &&
+						getRelativeTile(level, this.x - 27, this.y + 15, 1, 0).getType() == 0) {
+			return true;
+		}
+		return false;
+	}
 
 	boolean collidesWith(Shape other) {
 	    return this.getBounds().getBounds2D().intersects(other.getBounds2D());
 	}
 
-
-
-
-
-	public void update(Game game, Controller controller) {
-		this.snapX = this.x / 40;
-		this.snapY = this.y / 40;
-
-		var level = game.getLevel();
-
-		if (level.coins != null) {
-			for (Coin coin : level.coins) {
-				if (this.collidesWith(coin.getBounds()) && !coin.collected) {
-					coin.collected = true;
-
-					//Coin sound
-					MusicPlayer.play(COIN);
-				}
-			}
-		}
-
-		if (level.getTileMap() != new ArrayList<Tile>()) {
-			if (level.allCoinsCollected()) {
-				for (Tile t : level.getTileMap()) {
-					if (t.getType() == 3 && this.collidesWith(t.getBounds())) {
-						goalReached = true;
-					}
-				}
-			}
-		}
-
-		checkCollisionUp(level);
-		checkCollisionDown(level);
-		checkCollisionLeft(level);
-		checkCollisionRight(level);
-
-		if (this.dead) {
-			this.opacity = 0;
-		} else {
-			move(controller.getMove(game, this));
-		}
-
-		if (this.x > 800) this.x = 0;
-		if (this.x < 0) this.x = 800;
-		if (this.y > 600) this.y = 0;
-		if (this.y < 0) this.y = 600;
-
-		if (!this.dead) {
-			for (Dot dot : level.dots) {
-				if (this.collidesWith(dot.getBounds())) {
-					this.deaths ++;
-					this.dead = true;
-					/*if (!Game.muted) {
-						//Play the smack sound
-						TinySound.init();
-						TinySound.loadSound(ClassLoader.getSystemResource(
-								"net/thedanpage/worldshardestgame/resources/smack.wav")).play();
-					}*/
-				}
-			}
-		}
-		if(this.dead) { this.fitness = game.calculateFitness(this); }
+	public void moveLeft(GameLevel level) {
+		if(!checkCollisionLeft(level)) this.x-=moveFactor;
 	}
 
-	public void moveLeft() {
-		if(!collidingLeft) this.x-=moveFactor;
+	public void moveRight(GameLevel level) {
+		if(!checkCollisionRight(level)) this.x+=moveFactor;
 	}
 
-	public void moveRight() {
-		if(!collidingRight) this.x+=moveFactor;
+	public void moveDown(GameLevel level) {
+		if(!checkCollisionDown(level)) this.y+=moveFactor;
 	}
 
-	public void moveDown() {
-		if(!collidingDown) this.y+=moveFactor;
+	public void moveUp(GameLevel level) {
+		if(!checkCollisionUp(level)) this.y-=moveFactor;
 	}
 
-	public void moveUp() {
-		if(!collidingUp) this.y-=moveFactor;
-	}
-
-	public void move(Move move) {
+	public void move(Move move, GameLevel level) {
 		switch (move) {
 			case LEFT:
-				moveLeft();
+				moveLeft(level);
 				break;
 			case RIGHT:
-				moveRight();
+				moveRight(level);
 				break;
 			case DOWN:
-				moveDown();
+				moveDown(level);
 				break;
 			case UP:
-				moveUp();
+				moveUp(level);
 				break;
 			case LEFTUP:
-				moveLeft();
-				moveUp();
+				moveLeft(level);
+				moveUp(level);
 				break;
 			case LEFTDOWN:
-				moveLeft();
-				moveDown();
+				moveLeft(level);
+				moveDown(level);
 				break;
 			case RIGHTUP:
-				moveRight();
-				moveUp();
+				moveRight(level);
+				moveUp(level);
 				break;
 			case RIGHTDOWN:
-				moveRight();
-				moveDown();
+				moveRight(level);
+				moveDown(level);
 				break;
 			case NEUTRAL:
 				break;
@@ -401,20 +286,6 @@ public class Player {
 	public int getY() {
 		return this.y;
 	}
-
-
-
-	public int getSnapX() {
-		return this.snapX;
-	}
-
-
-
-	public int getSnapY() {
-		return this.snapY;
-	}
-
-
 
 	public int getWidth() {
 		return (int) this.getBounds().getWidth();
@@ -450,14 +321,6 @@ public class Player {
 		return this.collidingDown;
 	}
 
-
-
-	public int getDeaths() {
-		return this.deaths;
-	}
-
-
-
 	public boolean isDead() {
 		return this.dead;
 	}
@@ -479,13 +342,10 @@ public class Player {
 	public void reset() {
 		this.x = 400;
 		this.y = 300;
-		this.snapX = x/40;
-		this.snapY = y/40;
 		this.collidingUp = false;
 		this.collidingDown = false;
 		this.collidingLeft = false;
 		this.collidingRight = false;
-		this.deaths = 0;
 		this.dead = false;
 		this.opacity = 255;
 	}
@@ -493,10 +353,8 @@ public class Player {
 
 	@Override
 	public String toString() {
-		return "Player [x=" + x + ", y=" + y + ", snapX=" + snapX + ", snapY="
-				+ snapY + ", collidingUp=" + collidingUp + ", collidingDown="
+		return "Player [x=" + x + ", y=" + y + ", collidingUp=" + collidingUp + ", collidingDown="
 				+ collidingDown + ", collidingLeft=" + collidingLeft
-				+ ", collidingRight=" + collidingRight + ", deaths=" + deaths
-				+ ", dead=" + dead + "]";
+				+ ", collidingRight=" + collidingRight + ", dead=" + dead + "]";
 	}
 }

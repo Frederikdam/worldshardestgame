@@ -45,6 +45,7 @@ import net.thedanpage.worldshardestgame.controllers.GeneticController;
 
 import static java.lang.Thread.currentThread;
 import static java.lang.Thread.sleep;
+import static net.thedanpage.worldshardestgame.Sound.COIN;
 
 public class Game extends JPanel implements ActionListener {
 
@@ -54,8 +55,6 @@ public class Game extends JPanel implements ActionListener {
 
     private Timer t = new Timer(5, this);
 
-    private int replayLevel = 1;
-
     public List<Player> population = new ArrayList<>();
 
     public int populationSize = 100;
@@ -63,6 +62,8 @@ public class Game extends JPanel implements ActionListener {
     private int playerMoveCount = 200;
 
     private int generation = 1;
+
+    private boolean goalReached = false;
 
     boolean running = false;
 
@@ -97,16 +98,15 @@ public class Game extends JPanel implements ActionListener {
         Toolkit.getDefaultToolkit().sync();
     }
 
-    public void goalReached(Player winnerPlayer) {
-        if (replay) {
+    public void goalReached() {
+        /*if (replay) {
             advanceToReplay(winnerPlayer);
             replay = false;
-            System.out.println("replay");
         } else {
             advanceToNextLevel();
             replay = true;
-            System.out.println("!replay");
-        }
+        }*/
+        advanceToNextLevel();
     }
 
     private void advanceToNextLevel() {
@@ -116,11 +116,12 @@ public class Game extends JPanel implements ActionListener {
             player.reset();
             player.respawn(currentLevel);
         }
+        goalReached = false;
     }
 
     private void advanceToReplay(Player winnerPlayer) {
         for (var player : population) {
-            player.goalReached = false;
+            goalReached = false;
             player.setDead(true);
         }
 
@@ -128,7 +129,6 @@ public class Game extends JPanel implements ActionListener {
         replayPlayer.reset();
         replayPlayer.respawn(currentLevel);
         replayPlayer.setMoves(winnerPlayer.getMoves());
-        replayPlayer.goalReached = false;
         replayPlayer.nextMoveIndex = 0;
     }
 
@@ -155,33 +155,26 @@ public class Game extends JPanel implements ActionListener {
      */
     private void render(Graphics g) {
         var deadPlayerCount = 0;
-        var isGoalReached = false;
-        Player winnerPlayer = null;
 
         currentLevel.drawTiles(g);
         currentLevel.drawCoins(g);
-        currentLevel.drawDots(g);
         currentLevel.updateDots();
+        currentLevel.drawDots(g);
+
 
         for (var player : population) {
             if(player.isDead()) deadPlayerCount++;
             player.draw(g);
-            player.update(this, controller);
-
-            if (player.goalReached) {
-                player.goalReached = false;
-                winnerPlayer = player;
-                isGoalReached = true;
-                break;
-            }
+            var nextMove = controller.getMove(this, player);
+            advanceGame(nextMove, player, currentLevel);
         }
 
         if(deadPlayerCount == populationSize) {
             evaluateGeneration();
         }
 
-        if (isGoalReached) {
-            goalReached(winnerPlayer);
+        if (goalReached) {
+            goalReached();
         }
 
         g.setColor(Color.BLACK);
@@ -191,6 +184,68 @@ public class Game extends JPanel implements ActionListener {
         drawRightJustifiedString("Generation: " + this.generation, 750, 17, g);
         drawCenteredString(currentLevel.getLevelNum() + "/" + levels.size(), 400, 17, g);
         g.dispose();
+    }
+
+    public void advanceGame(Move move, Player player, GameLevel level) {
+        advancePlayer(move, level, player);
+        //advanceDots(level);
+    }
+
+    private void advanceDots(GameLevel level) {
+        level.updateDots();
+    }
+
+    private void checkIfCoinCollected(GameLevel level, Player player) {
+        if (level.coins != null) {
+            for (Coin coin : level.coins) {
+                if (player.collidesWith(coin.getBounds()) && !coin.collected) {
+                    coin.collected = true;
+
+                    //Coin sound
+                    MusicPlayer.play(COIN);
+                }
+            }
+        }
+    }
+
+    private void checkIfGoalReached(GameLevel level, Player player) {
+        if (level.getTileMap() != new ArrayList<Tile>()) {
+            if (level.allCoinsCollected()) {
+                for (Tile t : level.getTileMap()) {
+                    if (t.getType() == 3 && player.collidesWith(t.getBounds())) {
+                        goalReached = true;
+                    }
+                }
+            }
+        }
+    }
+
+    private void checkCollisions(GameLevel level, Player player) {
+        player.checkCollisionUp(level);
+        player.checkCollisionDown(level);
+        player.checkCollisionLeft(level);
+        player.checkCollisionRight(level);
+    }
+
+    private void checkIfDead(GameLevel level, Player player) {
+        if (!player.isDead()) {
+            for (Dot dot : level.dots) {
+                if (player.collidesWith(dot.getBounds())) {
+                    player.setDead(true);
+                }
+            }
+        } else {
+            player.fitness = calculateFitness(player);
+        }
+    }
+
+    public void advancePlayer(Move move, GameLevel level, Player player) {
+        player.move(move, level);
+
+        checkIfCoinCollected(level, player);
+        checkIfGoalReached(level, player);
+        checkCollisions(level, player);
+        checkIfDead(level, player);
     }
 
     public void evaluateGeneration() {
