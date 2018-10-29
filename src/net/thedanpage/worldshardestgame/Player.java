@@ -5,16 +5,7 @@ import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Random;
-import java.util.logging.Level;
-
-import kuusisto.tinysound.Sound;
-import kuusisto.tinysound.TinySound;
-import net.thedanpage.worldshardestgame.controllers.Controller;
-import net.thedanpage.worldshardestgame.controllers.ExampleController;
-
-import static net.thedanpage.worldshardestgame.Sound.COIN;
 
 public class Player {
 

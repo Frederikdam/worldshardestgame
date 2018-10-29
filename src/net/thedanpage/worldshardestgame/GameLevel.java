@@ -9,7 +9,6 @@ import java.awt.geom.Area;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Scanner;
-import java.util.logging.Level;
 
 public class GameLevel {
 
@@ -68,8 +67,6 @@ public class GameLevel {
 	public Point getSpawnPoint() {
 		return this.spawnPoint;
 	}
-
-	public int getLevelNum() { return levelNum; }
 
 	public ArrayList<Tile> getTileMap() {
 		return this.tileMap;

@@ -1,50 +1,19 @@
 package net.thedanpage.worldshardestgame;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Dialog;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
-import java.awt.GradientPaint;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.font.FontRenderContext;
-import java.awt.font.TextLayout;
-import java.awt.geom.AffineTransform;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.Timer;
-
-import kuusisto.tinysound.Music;
-import kuusisto.tinysound.Sound;
-import kuusisto.tinysound.TinySound;
 import net.thedanpage.worldshardestgame.controllers.Controller;
-import net.thedanpage.worldshardestgame.controllers.ExampleController;
-import net.thedanpage.worldshardestgame.controllers.GeneticController;
 
-import static java.lang.Thread.currentThread;
-import static java.lang.Thread.sleep;
 import static net.thedanpage.worldshardestgame.Sound.COIN;
 
 public class Game extends JPanel implements ActionListener {
@@ -117,6 +86,7 @@ public class Game extends JPanel implements ActionListener {
     public void advanceGame() {
         var deadPlayerCount = 0;
         advanceDots(currentLevel);
+
         for(Player player : population) {
             var nextMove = controller.getMove(this, player);
             advancePlayer(nextMove, currentLevel, player);
@@ -142,8 +112,6 @@ public class Game extends JPanel implements ActionListener {
             for (Coin coin : level.coins) {
                 if (player.collidesWith(coin.getBounds()) && !coin.collected) {
                     coin.collected = true;
-
-                    //Coin sound
                     MusicPlayer.play(COIN);
                 }
             }
