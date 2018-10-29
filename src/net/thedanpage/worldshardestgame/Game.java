@@ -51,8 +51,6 @@ public class Game extends JPanel implements ActionListener {
 
     public Controller controller;
 
-    private boolean replay = true;
-
     public Timer t = new Timer(5, this);
 
     public List<Player> population = new ArrayList<>();
@@ -69,19 +67,11 @@ public class Game extends JPanel implements ActionListener {
 
     boolean running = false;
 
-    private Player currentPlayer;
-
-    private ArrayList<GameLevel> levels;
-
-    private int currentLevelIndex = 0;
-
     public GameLevel currentLevel;
 
-    public Game(Controller controller, Player currentPlayer, ArrayList<GameLevel> levels) {
+    public Game(Controller controller, GameLevel level) {
         this.controller = controller;
-        this.currentPlayer = currentPlayer;
-        this.levels = levels;
-        this.currentLevel = levels.get(currentLevelIndex);
+        this.currentLevel = level;
         intializePopulation();
     }
 
@@ -93,6 +83,7 @@ public class Game extends JPanel implements ActionListener {
         super.paintComponent(g);
 
         update(g);
+        advanceGame();
         render(g);
 
         t.start();
@@ -100,74 +91,36 @@ public class Game extends JPanel implements ActionListener {
         Toolkit.getDefaultToolkit().sync();
     }
 
-    public void goalReached() {
-        /*if (replay) {
-            advanceToReplay(winnerPlayer);
-            replay = false;
-        } else {
-            advanceToNextLevel();
-            replay = true;
-        }*/
-        advanceToNextLevel();
-    }
-
-    private void advanceToNextLevel() {
-        if(currentLevelIndex == levels.size()) System.exit(0);
-        currentLevel = levels.get(++currentLevelIndex);
-        for (var player : population) {
-            player.reset();
-            player.respawn(currentLevel);
-        }
-        goalReached = false;
-    }
-
-    public void advanceToReplay(Player winnerPlayer) {
-        for (var player : population) {
-            goalReached = false;
-            player.setDead(true);
-        }
-
-        Player replayPlayer = winnerPlayer;
-        replayPlayer.reset();
-        replayPlayer.respawn(currentLevel);
-        replayPlayer.setMoves(winnerPlayer.getMoves());
-        replayPlayer.nextMoveIndex = 0;
-    }
-
-
-
-    /** Update the game.
-     *
-     * @param g
-     * */
     public void update(Graphics g) {
         if(running) return;
 
         for (var player : population) {
-            player.reset();
             player.respawn(currentLevel);
         }
 
         running = true;
     }
 
-    /** Draw the game's graphics.
-     *
-     * @param g
-     */
     private void render(Graphics g) {
-        var deadPlayerCount = 0;
-
         currentLevel.drawTiles(g);
         currentLevel.drawCoins(g);
-        advanceDots(currentLevel);
         currentLevel.drawDots(g);
+        for (var player : population) player.draw(g);
+        g.setColor(Color.BLACK);
+        g.fillRect(0, 0, 800, 22);
+        g.setColor(Color.WHITE);
+        g.setFont(new Font("Tahoma", Font.BOLD, 18));
+        drawRightJustifiedString("Generation: " + this.generation, 750, 17, g);
+        g.dispose();
+    }
 
-        for (var player : population) {
+    public void advanceGame() {
+        var deadPlayerCount = 0;
+        advanceDots(currentLevel);
+        for(Player player : population) {
             var nextMove = controller.getMove(this, player);
             advancePlayer(nextMove, currentLevel, player);
             if(player.isDead()) deadPlayerCount++;
-            player.draw(g);
         }
 
         if(deadPlayerCount == populationSize) {
@@ -175,21 +128,9 @@ public class Game extends JPanel implements ActionListener {
         }
 
         if (goalReached) {
-            goalReached();
+            System.out.println("Goal Reached!");
+            System.exit(0);
         }
-
-        g.setColor(Color.BLACK);
-        g.fillRect(0, 0, 800, 22);
-        g.setColor(Color.WHITE);
-        g.setFont(new Font("Tahoma", Font.BOLD, 18));
-        drawRightJustifiedString("Generation: " + this.generation, 750, 17, g);
-        drawCenteredString(currentLevel.getLevelNum() + "/" + levels.size(), 400, 17, g);
-        g.dispose();
-    }
-
-    public void advanceGame(Move move, Player player, GameLevel level) {
-        advancePlayer(move, level, player);
-        advanceDots(level);
     }
 
     public void advanceDots(GameLevel level) {
@@ -238,7 +179,10 @@ public class Game extends JPanel implements ActionListener {
                 }
             }
         }
-        if (player.isDead()) player.fitness = calculateFitness(player);
+        if (player.isDead()) {
+            player.fitness = calculateFitness(player);
+            player.opacity = 0;
+        }
     }
 
     public void advancePlayer(Move move, GameLevel level, Player player) {
@@ -252,7 +196,6 @@ public class Game extends JPanel implements ActionListener {
 
     public void evaluateGeneration() {
         this.generation++;
-        //updateFitness();
         if(this.generation % 5 == 0) {
             if (this.playerMoveCount < 5000) this.playerMoveCount *= 1.2;
         }
@@ -265,7 +208,7 @@ public class Game extends JPanel implements ActionListener {
             player.respawn(currentLevel);
         }
 
-        System.out.println("Fitness: " + bestCandidates.get(0).fitness + " MoveCount: " + bestCandidates.get(0).getMoves().length);
+        System.out.println("Fitness: " + bestCandidates.get(0).fitness + " MoveCount: " + bestCandidates.get(0).getMoves().size());
     }
 
     public List<Player> selection() {
@@ -299,47 +242,17 @@ public class Game extends JPanel implements ActionListener {
         repaint();
     }
 
-    private void drawCenteredString(String s, int w, int h, Graphics g) {
-        FontMetrics fm = g.getFontMetrics();
-        int x = (w*2 - fm.stringWidth(s)) / 2;
-        g.drawString(s, x, h);
-    }
-
     private void drawRightJustifiedString(String s, int w, int h, Graphics g) {
         FontMetrics fm = g.getFontMetrics();
         int x = (w - fm.stringWidth(s));
         g.drawString(s, x, h);
     }
 
-    /**
-     * Convert an exception to a String with full stack trace
-     *
-     * @param ex
-     *            the exception
-     * @return A string with the full stacktrace error text
-     */
-    public static String getStringFromStackTrace(Throwable ex) {
-        if (ex == null) {
-            return "";
-        }
-        StringWriter str = new StringWriter();
-        PrintWriter writer = new PrintWriter(str);
-        try {
-            ex.printStackTrace(writer);
-            return str.getBuffer().toString();
-        } finally {
-            try {
-                str.close();
-                writer.close();
-            } catch (IOException e) {
-                // ignore
-            }
-        }
-    }
-
     private void intializePopulation() {
         for (var i = 0; i < populationSize; i++) {
-            population.add(new Player(playerMoveCount));
+            var player = new Player(playerMoveCount);
+            player.respawn(currentLevel);
+            population.add(player);
         }
     }
 }

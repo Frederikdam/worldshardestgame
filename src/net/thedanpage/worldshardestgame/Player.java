@@ -44,20 +44,20 @@ public class Player {
 	/** The opacity of the player. */
 	public double opacity;
 
-	private Move[] moves;
+	private ArrayList<Move> moves;
 
 	public int nextMoveIndex = 0;
 
-	private double mutationRate = 0.01;
+	private double mutationRate = 0.05;
 
 	public double fitness = 0;
 
 	private Random rnd = new Random();
 
-	public Player(int moveCount, Move[] moves) {
+	public Player(int moveCount, ArrayList<Move> moves) {
 		this(moveCount);
-		for(var i = 0; i < moves.length; i++) {
-			this.moves[i] = moves[i];
+		for(var i = 0; i < moves.size(); i++) {
+			this.moves.set(i, moves.get(i));
 		}
 	}
 
@@ -82,20 +82,20 @@ public class Player {
 		this.dead = false;
 		this.opacity = 255;
 
-		this.moves = new Move[moveCount];
-		initializeRandomMoves();
+		this.moves = new ArrayList<>();
+		initializeRandomMoves(moveCount);
 	}
 
-	public void initializeRandomMoves() {
-		for(var i = 0; i < this.moves.length; i++) {
-			this.moves[i] = getRandomMove();
+	public void initializeRandomMoves(int moveCount) {
+		for(var i = 0; i < moveCount; i++) {
+			this.moves.add(getRandomMove());
 		}
 	}
 
-	public Move[] getMoves() {
+	public ArrayList<Move> getMoves() {
 		return this.moves;
 	}
-	public void setMoves(Move[] moves) {
+	public void setMoves(ArrayList<Move> moves) {
 		this.moves = moves;
 	}
 
@@ -104,21 +104,21 @@ public class Player {
 	}
 
 	public void mutate() {
-		for(var i = 0; i < moves.length; i++) {
+		for(var i = 0; i < moves.size(); i++) {
 			var randomDouble = rnd.nextDouble();
 			var mutated = randomDouble <= mutationRate;
 			if(mutated) {
-				this.moves[i] = getRandomMove();
+				this.moves.set(i, getRandomMove());
 			}
 		}
 	}
 
 	public Move getNextMove() {
-		if(nextMoveIndex >= this.moves.length) {
+		if(nextMoveIndex >= this.moves.size()) {
 			this.dead = true;
 			return Move.NEUTRAL;
 		}
-		return this.moves[nextMoveIndex++];
+		return this.moves.get(nextMoveIndex++);
 	}
 
 
@@ -175,6 +175,9 @@ public class Player {
 	}
 
 	void respawn(GameLevel level) {
+		this.nextMoveIndex = 0;
+		this.dead = false;
+		this.opacity = 255;
 		this.x = level.getSpawnPoint().x;
 		this.y = level.getSpawnPoint().y;
 		if (level.coins != null) {
@@ -335,19 +338,6 @@ public class Player {
 
 	public double getOpacity() {
 		return this.opacity;
-	}
-
-
-
-	public void reset() {
-		this.x = 400;
-		this.y = 300;
-		this.collidingUp = false;
-		this.collidingDown = false;
-		this.collidingLeft = false;
-		this.collidingRight = false;
-		this.dead = false;
-		this.opacity = 255;
 	}
 
 
