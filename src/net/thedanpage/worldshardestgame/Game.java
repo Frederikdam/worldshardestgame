@@ -18,41 +18,41 @@ import static net.thedanpage.worldshardestgame.Sound.COIN;
 
 public class Game extends JPanel implements ActionListener {
 
-    public Controller controller;
+    Timer t = new Timer(5, this);
 
-    public Timer t = new Timer(5, this);
+    int populationSize = 100;
+    List<Player> population = new ArrayList<>();
 
-    public List<Player> population = new ArrayList<>();
-
-    public int populationSize = 100;
-
-    public Player winningPlayer = null;
-
-    private int playerMoveCount = 10;
-
-    private int generation = 1;
-
-    public boolean goalReached = false;
-
+    int playerMoveCount = 10;
+    int generation = 1;
+    boolean goalReached = false;
     boolean running = false;
 
-    public GameLevel currentLevel;
+    Controller controller;
+    GameLevel level;
+
+    Player winningPlayer = null;
 
     public Game(Controller controller, GameLevel level) {
         this.controller = controller;
-        this.currentLevel = level;
+        this.level = level;
         intializePopulation();
     }
 
+    public boolean goalReached() { return goalReached; }
+    public void goalReached(boolean goalReached) { this.goalReached = goalReached; }
+
+    public GameLevel getLevel() { return level; }
+
     public double calculateFitness(Player player) {
-        return currentLevel.getDistanceToGoal(player);
+        return getLevel().getDistanceToGoal(player);
     }
 
     public void paintComponent(final Graphics g) {
         super.paintComponent(g);
 
         update(g);
-        advanceGame();
+
         render(g);
 
         t.start();
@@ -64,16 +64,17 @@ public class Game extends JPanel implements ActionListener {
         if(running) return;
 
         for (var player : population) {
-            player.respawn(currentLevel);
+            player.respawn(getLevel());
         }
 
         running = true;
     }
 
     private void render(Graphics g) {
-        currentLevel.drawTiles(g);
-        currentLevel.drawCoins(g);
-        currentLevel.drawDots(g);
+        getLevel().drawTiles(g);
+        getLevel().drawCoins(g);
+        getLevel().drawDots(g);
+
         for (var player : population) player.draw(g);
         g.setColor(Color.BLACK);
         g.fillRect(0, 0, 800, 22);
@@ -85,11 +86,11 @@ public class Game extends JPanel implements ActionListener {
 
     public void advanceGame() {
         var deadPlayerCount = 0;
-        advanceDots(currentLevel);
+        advanceDots(getLevel());
 
         for(Player player : population) {
-            var nextMove = controller.getMove(this, player);
-            advancePlayer(nextMove, currentLevel, player);
+            var nextMove = player.getNextMove();
+            advancePlayer(nextMove, getLevel(), player);
             if(player.isDead()) deadPlayerCount++;
         }
 
@@ -97,7 +98,7 @@ public class Game extends JPanel implements ActionListener {
             evaluateGeneration();
         }
 
-        if (goalReached) {
+        if (goalReached()) {
             System.out.println("Goal Reached!");
             System.exit(0);
         }
@@ -123,7 +124,7 @@ public class Game extends JPanel implements ActionListener {
             if (level.allCoinsCollected()) {
                 for (Tile t : level.getTileMap()) {
                     if (t.getType() == 3 && player.collidesWith(t.getBounds())) {
-                        goalReached = true;
+                        goalReached(true);
                         winningPlayer = player;
                     }
                 }
@@ -171,9 +172,9 @@ public class Game extends JPanel implements ActionListener {
         var bestCandidates = selection();
         var newPopulation = mutate(bestCandidates);
         population = newPopulation;
-        currentLevel.reset();
+        getLevel().reset();
         for(Player player : population) {
-            player.respawn(currentLevel);
+            player.respawn(getLevel());
         }
 
         System.out.println("Fitness: " + bestCandidates.get(0).fitness + " MoveCount: " + bestCandidates.get(0).getMoves().size());
@@ -204,7 +205,7 @@ public class Game extends JPanel implements ActionListener {
         return children;
     }
 
-    public GameLevel getLevel() { return currentLevel; }
+
 
     public void actionPerformed(ActionEvent arg0) {
         repaint();
@@ -219,7 +220,7 @@ public class Game extends JPanel implements ActionListener {
     private void intializePopulation() {
         for (var i = 0; i < populationSize; i++) {
             var player = new Player(playerMoveCount);
-            player.respawn(currentLevel);
+            player.respawn(getLevel());
             population.add(player);
         }
     }

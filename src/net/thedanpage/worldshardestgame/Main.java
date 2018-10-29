@@ -37,7 +37,7 @@ public class Main {
     private static void runTest(Controller controller, GameLevel level, boolean replay) {
         var game = new Game(controller, level);
 
-        while(!game.goalReached) {
+        while(!game.goalReached()) {
             game.advanceGame();
         }
     }
