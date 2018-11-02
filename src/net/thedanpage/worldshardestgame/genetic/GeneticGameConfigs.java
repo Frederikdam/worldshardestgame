@@ -4,13 +4,13 @@ import java.util.function.Function;
 
 public class GeneticGameConfigs {
     public int populationSize;
-    public int initialMoveCount;
+    public int moveCount;
     public double mutationRate;
-    public Function<Double, Double> mutationChange;
+    public Function<Integer, Integer> mutationChange;
 
-    public GeneticGameConfigs(int populationSize, int initialMoveCount, double mutationRate, Function<Double, Double> mutationChange) {
+    public GeneticGameConfigs(int populationSize, int moveCount, double mutationRate, Function<Integer, Integer> mutationChange) {
         this.populationSize = populationSize;
-        this.initialMoveCount = initialMoveCount;
+        this.moveCount = moveCount;
         this.mutationRate = mutationRate;
         this.mutationChange = mutationChange;
     }

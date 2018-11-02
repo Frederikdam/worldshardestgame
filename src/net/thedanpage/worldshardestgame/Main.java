@@ -1,7 +1,6 @@
 package net.thedanpage.worldshardestgame;
 
-import net.thedanpage.worldshardestgame.controllers.Controller;
-import net.thedanpage.worldshardestgame.controllers.GeneticController;
+import net.thedanpage.worldshardestgame.genetic.GeneticController;
 import net.thedanpage.worldshardestgame.genetic.GeneticGame;
 import net.thedanpage.worldshardestgame.genetic.GeneticGameConfigs;
 
@@ -13,7 +12,7 @@ import static net.thedanpage.worldshardestgame.Sound.BACKGROUND;
 public class Main {
     public static void main(String[] args) {
         var sound = false;
-        var test = false;
+        var test = true;
         var replay = false;
 
         var game = createGame(Algorithm.GENETIC);
@@ -68,9 +67,12 @@ public class Main {
         switch(algorithm) {
             case GENETIC:
                 var populationSize = 100;
-                var initialMoveCount = 5;
+                var initialMoveCount = 10;
                 var mutationRate = 0.05;
-                Function<Double, Double> mutationChange = value -> value * 0.01;
+                Function<Integer, Integer> mutationChange = value -> {
+                    Double newValue = value < 5000 ? value * 1.2 : value;
+                    return newValue.intValue();
+                };
 
                 var controller = new GeneticController();
                 var gameConfigs = new GeneticGameConfigs(populationSize, initialMoveCount, mutationRate, mutationChange);

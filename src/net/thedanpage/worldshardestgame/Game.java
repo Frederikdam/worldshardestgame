@@ -8,11 +8,9 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import javax.swing.JPanel;
 import javax.swing.Timer;
-import net.thedanpage.worldshardestgame.controllers.Controller;
 
 import static net.thedanpage.worldshardestgame.Sound.COIN;
 
@@ -31,7 +29,6 @@ public abstract class Game extends JPanel implements ActionListener {
     public Game(Controller controller, GameLevel level) {
         this.controller = controller;
         this.level = level;
-        population = initializePopulation();
     }
 
     public abstract int generationCount();
@@ -40,6 +37,10 @@ public abstract class Game extends JPanel implements ActionListener {
     public abstract List<Player> initializePopulation();
 
     public GameLevel getLevel() { return level; }
+
+    public void setup() {
+        population = initializePopulation();
+    }
 
     public void paintComponent(final Graphics g) {
         super.paintComponent(g);

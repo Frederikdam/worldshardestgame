@@ -5,7 +5,7 @@ import java.util.List;
 import net.thedanpage.worldshardestgame.Game;
 import net.thedanpage.worldshardestgame.GameLevel;
 import net.thedanpage.worldshardestgame.Player;
-import net.thedanpage.worldshardestgame.controllers.Controller;
+import net.thedanpage.worldshardestgame.Controller;
 
 public class GeneticGame extends Game {
     int generation = 1;
@@ -14,6 +14,7 @@ public class GeneticGame extends Game {
     public GeneticGame(Controller controller, GameLevel level, GeneticGameConfigs gameConfigs) {
         super(controller, level);
         this.gameConfigs = gameConfigs;
+        this.setup();
     }
 
     public double calculateFitness(Player player) {
@@ -38,11 +39,12 @@ public class GeneticGame extends Game {
     public void evaluateGeneration() {
         this.generation++;
         if(this.generation % 5 == 0) {
-            if (gameConfigs.initialMoveCount < 5000) gameConfigs.initialMoveCount *= 1.2;
+            gameConfigs.moveCount = gameConfigs.mutationChange.apply(gameConfigs.moveCount);
         }
 
         var bestCandidates = selection();
         var newPopulation = mutate(bestCandidates);
+        population = newPopulation;
         getLevel().reset();
 
         for(Player player : this.population) {
@@ -69,7 +71,7 @@ public class GeneticGame extends Game {
         var childrenCountPerCandidate = gameConfigs.populationSize / candidates.size();
         for(var candidate : candidates) {
             for(var i = 0; i < childrenCountPerCandidate; i++) {
-                var child = new Player(gameConfigs.initialMoveCount, candidate.getMoves());
+                var child = new Player(gameConfigs.moveCount, candidate.getMoves());
                 child.mutate(gameConfigs.mutationRate);
                 children.add(child);
             }
@@ -81,8 +83,7 @@ public class GeneticGame extends Game {
     public List<Player> initializePopulation() {
         var players = new ArrayList<Player>();
         for (var i = 0; i < gameConfigs.populationSize; i++) {
-            var player = new Player(gameConfigs.initialMoveCount);
-            player.respawn(getLevel());
+            var player = new Player(gameConfigs.moveCount);
             players.add(player);
         }
 
