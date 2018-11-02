@@ -94,7 +94,7 @@ public class GeneticGame extends Game {
     }
 
     @Override
-    private List<Player> intializePopulation() {
+    public List<Player> initializePopulation() {
         for (var i = 0; i < gameConfigs.populationSize; i++) {
             var player = new Player(gameConfigs.initialMoveCount);
             player.respawn(getLevel());
