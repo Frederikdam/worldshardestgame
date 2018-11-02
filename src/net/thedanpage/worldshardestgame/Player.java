@@ -7,7 +7,7 @@ import java.awt.Shape;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class Player {
+public abstract class Player {
 
 	/** The X coordinate of the player. */
 	private int x;
@@ -30,25 +30,14 @@ public class Player {
 	private boolean collidingRight;
 
 	/** True if the player has been hit and is not allowed to move. */
-	private boolean dead;
+	public boolean dead;
 
 	/** The opacity of the player. */
 	public double opacity;
 
-	private ArrayList<Move> moves;
-
 	public int nextMoveIndex = 0;
 
-	public double fitness = 0;
-
 	private Random rnd = new Random();
-
-	public Player(int moveCount, ArrayList<Move> moves) {
-		this(moveCount);
-		for(var i = 0; i < moves.size(); i++) {
-			this.moves.set(i, moves.get(i));
-		}
-	}
 
 	public Player() {
 		this.x = 400;
@@ -61,56 +50,13 @@ public class Player {
 		this.opacity = 255;
 	}
 
-	public Player(int moveCount) {
-		this.x = 400;
-		this.y = 300;
-		this.collidingUp = false;
-		this.collidingDown = false;
-		this.collidingLeft = false;
-		this.collidingRight = false;
-		this.dead = false;
-		this.opacity = 255;
-
-		this.moves = new ArrayList<>();
-		initializeRandomMoves(moveCount);
+	public boolean isDead() {
+		return this.dead;
 	}
 
-	public void initializeRandomMoves(int moveCount) {
-		for(var i = 0; i < moveCount; i++) {
-			this.moves.add(getRandomMove());
-		}
+	public void setDead(boolean dead) {
+		this.dead = dead;
 	}
-
-	public ArrayList<Move> getMoves() {
-		return this.moves;
-	}
-	public void setMoves(ArrayList<Move> moves) {
-		this.moves = moves;
-	}
-
-	public Move getRandomMove() {
-		return Move.values()[this.rnd.nextInt(Move.values().length)];
-	}
-
-	public void mutate(double mutationRate) {
-		for(var i = 0; i < moves.size(); i++) {
-			var randomDouble = rnd.nextDouble();
-			var mutated = randomDouble <= mutationRate;
-			if(mutated) {
-				this.moves.set(i, getRandomMove());
-			}
-		}
-	}
-
-	public Move getNextMove() {
-		if(nextMoveIndex >= this.moves.size()) {
-			this.dead = true;
-			return Move.NEUTRAL;
-		}
-		return this.moves.get(nextMoveIndex++);
-	}
-
-
 
 	public void draw(Graphics g) {
 		g.setColor(new Color(0, 0, 0, (int) opacity));
@@ -119,10 +65,6 @@ public class Player {
 		g.fillRect(x-12, y-12 + 22,
 				   22, 22);
 	}
-
-
-
-
 
 	Tile getRelativeTile(GameLevel level, int x1, int y1, int xOff, int yOff) {
 		for (Tile t : level.getTileMap()) {
@@ -133,10 +75,6 @@ public class Player {
 		return null;
 	}
 
-
-
-
-
 	Tile getTile(GameLevel level) {
 		for (Tile t : level.getTileMap()) {
 			if (this.x/40 == t.getSnapX() && this.y/40 == t.getSnapY()) {
@@ -146,18 +84,10 @@ public class Player {
 		return null;
 	}
 
-
-
-
-
 	boolean doesIntersect(Rectangle a, Rectangle b) {
 		return (a.x + a.width < b.x || a.x > b.x + b.width
 				|| a.y + a.height < b.y || a.y > b.y + b.height);
 	}
-
-
-
-
 
 	public Rectangle getBounds() {
 		return new Rectangle(this.x - 15, this.y - 15, 28, 28);
@@ -268,67 +198,6 @@ public class Player {
 				break;
 		}
 	}
-
-	public int getX() {
-		return this.x;
-	}
-
-
-
-	public int getY() {
-		return this.y;
-	}
-
-	public int getWidth() {
-		return (int) this.getBounds().getWidth();
-	}
-
-
-
-	public int getHeight() {
-		return (int) this.getBounds().getHeight();
-	}
-
-
-
-	public boolean isCollidingLeft() {
-		return this.collidingLeft;
-	}
-
-
-
-	public boolean isCollidingRight() {
-		return this.collidingRight;
-	}
-
-
-
-	public boolean isCollidingUp() {
-		return this.collidingUp;
-	}
-
-
-
-	public boolean isCollidingDown() {
-		return this.collidingDown;
-	}
-
-	public boolean isDead() {
-		return this.dead;
-	}
-
-
-
-	public void setDead(boolean dead) {
-		this.dead = dead;
-	}
-
-
-
-	public double getOpacity() {
-		return this.opacity;
-	}
-
 
 	@Override
 	public String toString() {

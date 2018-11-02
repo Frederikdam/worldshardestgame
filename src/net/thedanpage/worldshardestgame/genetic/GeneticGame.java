@@ -28,7 +28,8 @@ public class GeneticGame extends Game {
 
     @Override
     public void playerIsDead(Player player) {
-        player.fitness = calculateFitness(player);
+        var geneticPlayer = (GeneticPlayer) player;
+        geneticPlayer.fitness = calculateFitness(player);
     }
 
     @Override
@@ -54,24 +55,25 @@ public class GeneticGame extends Game {
         System.out.println("Fitness: " + bestCandidates.get(0).fitness + " MoveCount: " + bestCandidates.get(0).getMoves().size());
     }
 
-    public List<Player> selection() {
-        Player bestPlayer = null;
+    public List<GeneticPlayer> selection() {
+        GeneticPlayer bestPlayer = null;
         double bestFitness = Double.MAX_VALUE;
         for(var player : population) {
-            if(player.fitness < bestFitness) {
-                bestPlayer = player;
-                bestFitness = player.fitness;
+            var geneticPlayer = (GeneticPlayer) player;
+            if(geneticPlayer.fitness < bestFitness) {
+                bestPlayer = geneticPlayer;
+                bestFitness = geneticPlayer.fitness;
             }
         }
         return Arrays.asList(bestPlayer);
     }
 
-    public List<Player> mutate(List<Player> candidates) {
+    public List<Player> mutate(List<GeneticPlayer> candidates) {
         List<Player> children = new ArrayList<>();
         var childrenCountPerCandidate = gameConfigs.populationSize / candidates.size();
         for(var candidate : candidates) {
             for(var i = 0; i < childrenCountPerCandidate; i++) {
-                var child = new Player(gameConfigs.moveCount, candidate.getMoves());
+                var child = new GeneticPlayer(gameConfigs.moveCount, candidate.getMoves());
                 child.mutate(gameConfigs.mutationRate);
                 children.add(child);
             }
@@ -83,7 +85,7 @@ public class GeneticGame extends Game {
     public List<Player> initializePopulation() {
         var players = new ArrayList<Player>();
         for (var i = 0; i < gameConfigs.populationSize; i++) {
-            var player = new Player(gameConfigs.moveCount);
+            var player = new GeneticPlayer(gameConfigs.moveCount);
             players.add(player);
         }
 

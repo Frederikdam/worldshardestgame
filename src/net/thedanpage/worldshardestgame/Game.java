@@ -86,7 +86,7 @@ public abstract class Game extends JPanel implements ActionListener {
         advanceDots(getLevel());
 
         for(Player player : population) {
-            var nextMove = player.getNextMove();
+            var nextMove = controller.getMove(this, player);
             advancePlayer(nextMove, getLevel(), player);
             if(player.isDead()) deadPlayerCount++;
         }

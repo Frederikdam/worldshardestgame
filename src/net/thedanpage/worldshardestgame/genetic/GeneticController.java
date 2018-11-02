@@ -9,6 +9,7 @@ public class GeneticController extends Controller {
 
     @Override
     public Move getMove(Game game, Player player) {
-        return player.getNextMove();
+        var geneticPlayer = (GeneticPlayer) player;
+        return geneticPlayer.getNextMove();
     }
 }
