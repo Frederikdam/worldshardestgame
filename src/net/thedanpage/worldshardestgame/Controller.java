@@ -1,4 +1,4 @@
-package net.thedanpage.worldshardestgame.controllers;
+package net.thedanpage.worldshardestgame;
 
 import net.thedanpage.worldshardestgame.Game;
 import net.thedanpage.worldshardestgame.GameLevel;

@@ -1,34 +1,51 @@
 package net.thedanpage.worldshardestgame;
 
-import kuusisto.tinysound.TinySound;
-import net.thedanpage.worldshardestgame.controllers.Controller;
-import net.thedanpage.worldshardestgame.controllers.GeneticController;
+import net.thedanpage.worldshardestgame.genetic.GeneticController;
+import net.thedanpage.worldshardestgame.genetic.GeneticGame;
+import net.thedanpage.worldshardestgame.genetic.GeneticGameConfigs;
 
-import java.io.File;
 import java.util.ArrayList;
+import java.util.function.Function;
 
 import static net.thedanpage.worldshardestgame.Sound.BACKGROUND;
 
 public class Main {
     public static void main(String[] args) {
-        MusicPlayer.play(BACKGROUND);
+        var sound = false;
+        var test = true;
+        var replay = false;
 
-        var player = new Player();
-        var controller = new GeneticController();
-        var levels = createLevels();
-        var game = new Game(controller, player, levels);
+        var game = createGame(Algorithm.GENETIC);
 
+        if (sound) MusicPlayer.play(BACKGROUND);
+
+        if (test) {
+            runTest(game, replay);
+        }
+        else {
+            runGame(game, replay);
+        }
+    }
+
+    private static void runGame(Game game, boolean replay) {
         var frame = new Frame();
+
         frame.add(game);
         frame.setVisible(true);
     }
 
-    public static boolean levelExists(int levelNumber) {
+    private static void runTest(Game game, boolean replay) {
+        while(!game.goalReached) {
+            game.advanceGame();
+        }
+    }
+
+    private static boolean levelExists(int levelNumber) {
         String fileUrl = "net/thedanpage/worldshardestgame/resources/maps/level_" + levelNumber + ".txt";
         return ClassLoader.getSystemResource(fileUrl) != null;
     }
 
-    public static ArrayList<GameLevel> createLevels() {
+    private static ArrayList<GameLevel> createLevels() {
         ArrayList<GameLevel> levels = new ArrayList<>();
         int levelCount = 1;
         while (levelExists(levelCount)) {
@@ -38,4 +55,33 @@ public class Main {
         }
         return levels;
     }
+
+    private enum Algorithm {
+        GENETIC
+    }
+
+    private static Game createGame(Algorithm algorithm) {
+        var levelNumber = 1;
+        var level = createLevels().get(levelNumber-1);
+
+        switch(algorithm) {
+            case GENETIC:
+                var populationSize = 100;
+                var initialMoveCount = 10;
+                var mutationRate = 0.05;
+                Function<Integer, Integer> mutationChange = value -> {
+                    Double newValue = value < 5000 ? value * 1.2 : value;
+                    return newValue.intValue();
+                };
+
+                var controller = new GeneticController();
+                var gameConfigs = new GeneticGameConfigs(populationSize, initialMoveCount, mutationRate, mutationChange);
+                var geneticGame = new GeneticGame(controller, level, gameConfigs);
+
+                return geneticGame;
+        }
+
+        return null;
+    }
 }
+
