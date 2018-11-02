@@ -76,7 +76,6 @@ public class Main {
                 var gameConfigs = new GeneticGameConfigs(populationSize, initialMoveCount, mutationRate, mutationChange);
                 var geneticGame = new GeneticGame(controller, level, gameConfigs);
 
-
                 return geneticGame;
         }
 

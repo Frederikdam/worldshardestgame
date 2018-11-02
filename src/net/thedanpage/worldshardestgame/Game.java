@@ -19,18 +19,14 @@ import static net.thedanpage.worldshardestgame.Sound.COIN;
 public abstract class Game extends JPanel implements ActionListener {
 
     Timer t = new Timer(5, this);
-
-    int populationSize = 100;
     List<Player> population = new ArrayList<>();
 
-    int playerMoveCount = 10;
     int generation = 1;
     boolean goalReached = false;
     boolean running = false;
 
     Controller controller;
     GameLevel level;
-
     Player winningPlayer = null;
 
     public Game(Controller controller, GameLevel level) {

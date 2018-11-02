@@ -1,17 +1,7 @@
 package net.thedanpage.worldshardestgame.genetic;
-
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import javax.swing.Timer;
-
 import net.thedanpage.worldshardestgame.Game;
 import net.thedanpage.worldshardestgame.GameLevel;
 import net.thedanpage.worldshardestgame.Player;
@@ -23,13 +13,13 @@ public class GeneticGame extends Game {
 
     int generation = 1;
     boolean goalReached = false;
-    boolean running = false;
 
     Controller controller;
     GameLevel level;
     GeneticGameConfigs gameConfigs;
 
     Player winningPlayer = null;
+
 
     public GeneticGame(Controller controller, GameLevel level, GeneticGameConfigs gameConfigs) {
         this.controller = controller;
@@ -70,17 +60,6 @@ public class GeneticGame extends Game {
 
     public void advanceDots(GameLevel level) {
         level.updateDots();
-    }
-
-    private void checkIfCoinCollected(GameLevel level, Player player) {
-        if (level.coins != null) {
-            for (Coin coin : level.coins) {
-                if (player.collidesWith(coin.getBounds()) && !coin.collected) {
-                    coin.collected = true;
-                    MusicPlayer.play(COIN);
-                }
-            }
-        }
     }
 
     private void checkIfGoalReached(GameLevel level, Player player) {

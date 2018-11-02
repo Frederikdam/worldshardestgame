@@ -5,7 +5,7 @@ import java.util.function.Function;
 public class GeneticGameConfigs {
     public int populationSize;
     public int initialMoveCount;
-    public double mutationRate = 0.05;
+    public double mutationRate;
     public Function<Double, Double> mutationChange;
 
     public GeneticGameConfigs(int populationSize, int initialMoveCount, double mutationRate, Function<Double, Double> mutationChange) {
