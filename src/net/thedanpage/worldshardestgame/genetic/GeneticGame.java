@@ -1,4 +1,4 @@
-package net.thedanpage.worldshardestgame;
+package net.thedanpage.worldshardestgame.genetic;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -10,32 +10,31 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import javax.swing.JPanel;
 import javax.swing.Timer;
+
+import net.thedanpage.worldshardestgame.Game;
+import net.thedanpage.worldshardestgame.GameLevel;
+import net.thedanpage.worldshardestgame.Player;
 import net.thedanpage.worldshardestgame.controllers.Controller;
 
-import static net.thedanpage.worldshardestgame.Sound.COIN;
+public class GeneticGame extends Game {
 
-public abstract class Game extends JPanel implements ActionListener {
-
-    Timer t = new Timer(5, this);
-
-    int populationSize = 100;
     List<Player> population = new ArrayList<>();
 
-    int playerMoveCount = 10;
     int generation = 1;
     boolean goalReached = false;
     boolean running = false;
 
     Controller controller;
     GameLevel level;
+    GeneticGameConfigs gameConfigs;
 
     Player winningPlayer = null;
 
-    public Game(Controller controller, GameLevel level) {
+    public GeneticGame(Controller controller, GameLevel level, GeneticGameConfigs gameConfigs) {
         this.controller = controller;
         this.level = level;
+        this.gameConfigs = gameConfigs;
         intializePopulation();
     }
 
@@ -48,44 +47,7 @@ public abstract class Game extends JPanel implements ActionListener {
         return getLevel().getDistanceToGoal(player);
     }
 
-    public void paintComponent(final Graphics g) {
-        super.paintComponent(g);
-
-        update(g);
-
-        advanceGame();
-
-        render(g);
-
-        t.start();
-
-        Toolkit.getDefaultToolkit().sync();
-    }
-
-    public void update(Graphics g) {
-        if(running) return;
-
-        for (var player : population) {
-            player.respawn(getLevel());
-        }
-
-        running = true;
-    }
-
-    private void render(Graphics g) {
-        getLevel().drawTiles(g);
-        getLevel().drawCoins(g);
-        getLevel().drawDots(g);
-
-        for (var player : population) player.draw(g);
-        g.setColor(Color.BLACK);
-        g.fillRect(0, 0, 800, 22);
-        g.setColor(Color.WHITE);
-        g.setFont(new Font("Tahoma", Font.BOLD, 18));
-        drawRightJustifiedString("Generation: " + this.generation, 750, 17, g);
-        g.dispose();
-    }
-
+    @Override
     public void advanceGame() {
         var deadPlayerCount = 0;
         advanceDots(getLevel());
@@ -96,7 +58,7 @@ public abstract class Game extends JPanel implements ActionListener {
             if(player.isDead()) deadPlayerCount++;
         }
 
-        if(deadPlayerCount == populationSize) {
+        if(deadPlayerCount == gameConfigs.populationSize) {
             evaluateGeneration();
         }
 
@@ -205,18 +167,6 @@ public abstract class Game extends JPanel implements ActionListener {
             }
         }
         return children;
-    }
-
-
-
-    public void actionPerformed(ActionEvent arg0) {
-        repaint();
-    }
-
-    private void drawRightJustifiedString(String s, int w, int h, Graphics g) {
-        FontMetrics fm = g.getFontMetrics();
-        int x = (w - fm.stringWidth(s));
-        g.drawString(s, x, h);
     }
 
     private void intializePopulation() {

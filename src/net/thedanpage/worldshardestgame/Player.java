@@ -39,8 +39,6 @@ public class Player {
 
 	public int nextMoveIndex = 0;
 
-	private double mutationRate = 0.05;
-
 	public double fitness = 0;
 
 	private Random rnd = new Random();
@@ -97,7 +95,7 @@ public class Player {
 	public void mutate() {
 		for(var i = 0; i < moves.size(); i++) {
 			var randomDouble = rnd.nextDouble();
-			var mutated = randomDouble <= mutationRate;
+			var mutated = randomDouble <= game.;
 			if(mutated) {
 				this.moves.set(i, getRandomMove());
 			}
