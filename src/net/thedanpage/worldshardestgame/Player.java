@@ -92,10 +92,10 @@ public class Player {
 		return Move.values()[this.rnd.nextInt(Move.values().length)];
 	}
 
-	public void mutate() {
+	public void mutate(double mutationRate) {
 		for(var i = 0; i < moves.size(); i++) {
 			var randomDouble = rnd.nextDouble();
-			var mutated = randomDouble <= game.;
+			var mutated = randomDouble <= mutationRate;
 			if(mutated) {
 				this.moves.set(i, getRandomMove());
 			}
@@ -163,7 +163,7 @@ public class Player {
 		return new Rectangle(this.x - 15, this.y - 15, 28, 28);
 	}
 
-	void respawn(GameLevel level) {
+	public void respawn(GameLevel level) {
 		this.nextMoveIndex = 0;
 		this.dead = false;
 		this.opacity = 255;

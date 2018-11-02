@@ -36,7 +36,7 @@ public class Main {
     }
 
     private static void runTest(Game game, boolean replay) {
-        while(!game.goalReached()) {
+        while(!game.goalReached) {
             game.advanceGame();
         }
     }
