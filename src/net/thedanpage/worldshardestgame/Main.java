@@ -12,7 +12,7 @@ import static net.thedanpage.worldshardestgame.Sound.BACKGROUND;
 public class Main {
     public static void main(String[] args) {
         var sound = false;
-        var test = false;
+        var test = true;
         var replay = false;
 
         var game = createGame(Algorithm.GENETIC);

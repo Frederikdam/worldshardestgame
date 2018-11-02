@@ -129,13 +129,6 @@ public abstract class Game extends JPanel implements ActionListener {
         }
     }
 
-    private void checkCollisions(GameLevel level, Player player) {
-        player.checkCollisionUp(level);
-        player.checkCollisionDown(level);
-        player.checkCollisionLeft(level);
-        player.checkCollisionRight(level);
-    }
-
     private void checkIfDead(GameLevel level, Player player) {
         if (!player.isDead()) {
             for (Dot dot : level.dots) {
@@ -152,11 +145,12 @@ public abstract class Game extends JPanel implements ActionListener {
     }
 
     public void advancePlayer(Move move, GameLevel level, Player player) {
-        player.move(move, level);
+
+        if (!player.isDead())
+            player.move(move, level);
 
         checkIfCoinCollected(level, player);
         checkIfGoalReached(level, player);
-        checkCollisions(level, player);
         checkIfDead(level, player);
     }
 
