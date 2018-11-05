@@ -2,14 +2,13 @@ package net.thedanpage.worldshardestgame.genetic;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import net.thedanpage.worldshardestgame.Game;
-import net.thedanpage.worldshardestgame.GameLevel;
-import net.thedanpage.worldshardestgame.Player;
-import net.thedanpage.worldshardestgame.Controller;
 
-public class GeneticGame extends Game {
+import net.thedanpage.worldshardestgame.*;
+
+public class GeneticGame extends Game<GeneticPlayer> {
     int generation = 1;
     GeneticGameConfigs gameConfigs;
+    GeneticPlayer bestPlayer = null;
 
     public GeneticGame(Controller controller, GameLevel level, GeneticGameConfigs gameConfigs) {
         super(controller, level);
@@ -17,8 +16,25 @@ public class GeneticGame extends Game {
         this.setup();
     }
 
-    public double calculateFitness(Player player) {
-        return getLevel().getDistanceToGoal(player);
+    public double calculateFitness(GeneticPlayer player) {
+        double fitness;
+        if (getLevel().allCoinsCollected()) {
+            fitness = getLevel().getDistanceToGoal(player);
+        } else {
+            fitness = getLevel().getDistanceToNextCoin(player);
+        }
+
+        if(bestPlayer == null) return fitness;
+
+        //Novelty reward
+        var distance = player.distanceTo(bestPlayer);
+        double noveltyReward = distance * 0.4;
+        fitness -= noveltyReward;
+
+        //Death penalty
+        if (player.deadByDot) { fitness += 2; }
+
+        return fitness;
     }
 
     @Override
@@ -27,14 +43,22 @@ public class GeneticGame extends Game {
     }
 
     @Override
-    public void playerIsDead(Player player) {
-        var geneticPlayer = (GeneticPlayer) player;
-        geneticPlayer.fitness = calculateFitness(player);
+    public void playerIsDead(GeneticPlayer player) {
+        player.fitness = calculateFitness(player);
     }
 
     @Override
     public int generationCount() {
         return generation;
+    }
+
+    @Override
+    public void playerWon(GeneticPlayer player) {
+        getLevel().reset();
+        for(GeneticPlayer p : population) {
+            p.setDead(true);
+        }
+        player.respawn(getLevel());
     }
 
     public void evaluateGeneration() {
@@ -43,47 +67,44 @@ public class GeneticGame extends Game {
             gameConfigs.moveCount = gameConfigs.mutationChange.apply(gameConfigs.moveCount);
         }
 
-        var bestCandidates = selection();
-        var newPopulation = mutate(bestCandidates);
+        var bestCandidate = selection();
+        bestPlayer = bestCandidate;
+        var newPopulation = mutate(bestCandidate);
         population = newPopulation;
         getLevel().reset();
 
-        for(Player player : this.population) {
+        for(GeneticPlayer player : this.population) {
             player.respawn(getLevel());
         }
 
-        System.out.println("Fitness: " + bestCandidates.get(0).fitness + " MoveCount: " + bestCandidates.get(0).getMoves().size());
+        System.out.println("Fitness: " + bestCandidate.fitness + " MoveCount: " + bestCandidate.getMoves().size());
     }
 
-    public List<GeneticPlayer> selection() {
+    public GeneticPlayer selection() {
         GeneticPlayer bestPlayer = null;
         double bestFitness = Double.MAX_VALUE;
         for(var player : population) {
-            var geneticPlayer = (GeneticPlayer) player;
-            if(geneticPlayer.fitness < bestFitness) {
-                bestPlayer = geneticPlayer;
-                bestFitness = geneticPlayer.fitness;
+            if(player.fitness < bestFitness) {
+                bestPlayer = player;
+                bestFitness = player.fitness;
             }
         }
-        return Arrays.asList(bestPlayer);
+        return bestPlayer;
     }
 
-    public List<Player> mutate(List<GeneticPlayer> candidates) {
-        List<Player> children = new ArrayList<>();
-        var childrenCountPerCandidate = gameConfigs.populationSize / candidates.size();
-        for(var candidate : candidates) {
-            for(var i = 0; i < childrenCountPerCandidate; i++) {
-                var child = new GeneticPlayer(gameConfigs.moveCount, candidate.getMoves());
-                child.mutate(gameConfigs.mutationRate);
-                children.add(child);
-            }
+    public List<GeneticPlayer> mutate(GeneticPlayer candidate) {
+        List<GeneticPlayer> children = new ArrayList<>();
+        for(var i = 0; i < gameConfigs.populationSize; i++) {
+            var child = new GeneticPlayer(gameConfigs.moveCount, candidate.getMoves());
+            child.mutate(gameConfigs.mutationRate);
+            children.add(child);
         }
         return children;
     }
 
     @Override
-    public List<Player> initializePopulation() {
-        var players = new ArrayList<Player>();
+    public List<GeneticPlayer> initializePopulation() {
+        var players = new ArrayList<GeneticPlayer>();
         for (var i = 0; i < gameConfigs.populationSize; i++) {
             var player = new GeneticPlayer(gameConfigs.moveCount);
             players.add(player);

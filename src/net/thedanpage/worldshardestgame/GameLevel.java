@@ -6,6 +6,7 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
+import java.awt.geom.Point2D;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -42,23 +43,40 @@ public class GameLevel {
 	}
 
 	public void reset() {
-		resetDots();
+		resetCoins();
+	    resetDots();
 	}
 
 	public double getDistanceToGoal(Player player) {
 		for (Tile t : this.getTileMap()) {
 
 			if (t.getType() == 3) {
-				var tileX = t.getBounds().getCenterX();
-				var tileY = t.getBounds().getCenterY();
 
-				var playerX = player.getBounds().getCenterX();
-				var playerY = player.getBounds().getCenterY();
+				var x1 = t.getBounds().getCenterX();
+				var y1 = t.getBounds().getCenterY();
 
-				return Math.abs(tileX-playerX);
+				var x2 = player.getBounds().getCenterX();
+				var y2 = player.getBounds().getCenterY();
+
+				return Point2D.distance(x1, y1, x2, y2);
 			}
 		}
 		return -1;
+	}
+
+	public double getDistanceToNextCoin(Player player) {
+		for (Coin coin : this.coins) {
+			if (!coin.collected) {
+				var x1 = coin.getBounds().getCenterX();
+				var y1 = coin.getBounds().getCenterY();
+
+				var x2 = player.getBounds().getCenterX();
+				var y2 = player.getBounds().getCenterY();
+
+				return Point2D.distance(x1, y1, x2, y2);
+			}
+		}
+		return Double.MAX_VALUE;
 	}
 	
 	/**
@@ -144,6 +162,33 @@ public class GameLevel {
 		} catch(Exception e){}
 	}
 
+	public void resetCoins() {
+		this.coins = new ArrayList<Coin>();
+		String coinData = null;
+
+		//Retrieves the coin data
+		if (PropLoader.loadProperty("coins",
+				"net/thedanpage/worldshardestgame/resources/maps/level_"
+						+ levelNum + ".properties") != "null") {
+			coinData = PropLoader.loadProperty("coins",
+					"net/thedanpage/worldshardestgame/resources/maps/level_"
+							+ levelNum + ".properties");
+		}
+
+		if (coinData != null) {
+			coinData = coinData.replaceAll("\\Z", "");
+
+			if (coinData.contains("-")) {
+
+				String[] coins = coinData.split("-");
+				for (String s : coins) this.coins.add(new Coin((int) (Double.parseDouble(s.split(",")[0]) * 40),
+						(int) (Double.parseDouble(s.split(",")[1]) * 40)));
+
+			} else this.coins.add(new Coin((int) (Double.parseDouble(coinData.split(",")[0]) * 40),
+					(int) (Double.parseDouble(coinData.split(",")[1]) * 40)));
+		}
+	}
+
 	public void drawCoins(Graphics g) {
 		if (this.coins != null)
 			for (Coin coin : this.coins) coin.draw(g);
@@ -174,29 +219,7 @@ public class GameLevel {
 											"net/thedanpage/worldshardestgame/resources/maps/level_" + levelNum + ".properties")
 									.split(",")[1]) * 40 + 20);
 
-			String coinData = null;
-			
-			//Retrieves the coin data
-			if (PropLoader.loadProperty("coins", 
-					"net/thedanpage/worldshardestgame/resources/maps/level_"
-							+ levelNum + ".properties") != "null") {
-				coinData = PropLoader.loadProperty("coins", 
-						"net/thedanpage/worldshardestgame/resources/maps/level_"
-								+ levelNum + ".properties");
-			}
-			
-			if (coinData != null) {
-				coinData = coinData.replaceAll("\\Z", "");
-				
-				if (coinData.contains("-")) {
-					
-					String[] coins = coinData.split("-");
-					for (String s : coins) this.coins.add(new Coin((int) (Double.parseDouble(s.split(",")[0]) * 40),
-							(int) (Double.parseDouble(s.split(",")[1]) * 40)));
-					
-				} else this.coins.add(new Coin((int) (Double.parseDouble(coinData.split(",")[0]) * 40),
-						(int) (Double.parseDouble(coinData.split(",")[1]) * 40)));
-			}
+			resetCoins();
 
 			//Retrieves the tile data
 			InputStreamReader isr = new InputStreamReader(ClassLoader
@@ -226,30 +249,6 @@ public class GameLevel {
 			}
 		} catch (Exception e) {}
 		//Retrieves the dot data
-		try {
-			InputStreamReader isr = new InputStreamReader(ClassLoader
-					.getSystemResource(
-							"net/thedanpage/worldshardestgame/resources/maps/level_"
-									+ this.levelNum + ".txt").openStream());
-			Scanner scanner = new Scanner(isr);
-			String content = scanner.useDelimiter("\\Z").next();
-			String[] lines = content.split("\n");
-			scanner.close();
-			for (int i=19; lines[i] != null; i++) {
-				String line = lines[i];
-				String[] dotData = line.replaceAll(" ", "").split("-");
-				this.dots.add(new Dot(
-							Integer.parseInt(dotData[0]),
-							Integer.parseInt(dotData[1]),
-							new Point(Integer.parseInt(dotData[2].split(",")[0]),
-									  Integer.parseInt(dotData[2].split(",")[1])),
-							new Point(Integer.parseInt(dotData[3].split(",")[0]),
-									  Integer.parseInt(dotData[3].split(",")[1])),
-							Double.parseDouble(dotData[4]),
-							Boolean.parseBoolean(dotData[5]),
-							Boolean.parseBoolean(dotData[6])
-						));
-			}
-		} catch (Exception e) {}
+		resetDots();
 	}
 }

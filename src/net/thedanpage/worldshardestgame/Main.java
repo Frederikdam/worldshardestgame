@@ -3,6 +3,9 @@ package net.thedanpage.worldshardestgame;
 import net.thedanpage.worldshardestgame.genetic.GeneticController;
 import net.thedanpage.worldshardestgame.genetic.GeneticGame;
 import net.thedanpage.worldshardestgame.genetic.GeneticGameConfigs;
+import net.thedanpage.worldshardestgame.human.HumanController;
+import net.thedanpage.worldshardestgame.human.HumanGame;
+import net.thedanpage.worldshardestgame.human.HumanPlayer;
 
 import java.util.ArrayList;
 import java.util.function.Function;
@@ -10,10 +13,11 @@ import java.util.function.Function;
 import static net.thedanpage.worldshardestgame.Sound.BACKGROUND;
 
 public class Main {
+
     public static void main(String[] args) {
-        var sound = false;
+        var sound = true;
         var test = true;
-        var replay = false;
+        var replay = true;
 
         var game = createGame(Algorithm.GENETIC);
 
@@ -23,21 +27,25 @@ public class Main {
             runTest(game, replay);
         }
         else {
-            runGame(game, replay);
+            runGame(game);
         }
     }
 
-    private static void runGame(Game game, boolean replay) {
-        var frame = new Frame();
-
-        frame.add(game);
-        frame.setVisible(true);
+    private static void runGame(Game game) {
+        render(game);
     }
 
     private static void runTest(Game game, boolean replay) {
         while(!game.goalReached) {
             game.advanceGame();
         }
+        if(replay) { render(game); }
+    }
+
+    private static void render(Game game) {
+        var frame = new Frame();
+        frame.add(game);
+        frame.setVisible(true);
     }
 
     private static boolean levelExists(int levelNumber) {
@@ -57,20 +65,21 @@ public class Main {
     }
 
     private enum Algorithm {
-        GENETIC
+        GENETIC,
+        HUMAN
     }
 
     private static Game createGame(Algorithm algorithm) {
-        var levelNumber = 1;
+        var levelNumber = 2;
         var level = createLevels().get(levelNumber-1);
 
         switch(algorithm) {
             case GENETIC:
                 var populationSize = 100;
-                var initialMoveCount = 10;
-                var mutationRate = 0.05;
+                var initialMoveCount = 20;
+                var mutationRate = 0.01;
                 Function<Integer, Integer> mutationChange = value -> {
-                    Double newValue = value < 5000 ? value * 1.2 : value;
+                    Double newValue = value < 5000 ? value * 1.05 : value;
                     return newValue.intValue();
                 };
 
@@ -79,6 +88,10 @@ public class Main {
                 var geneticGame = new GeneticGame(controller, level, gameConfigs);
 
                 return geneticGame;
+            case HUMAN:
+                var humanController = new HumanController();
+                var humanGame = new HumanGame(humanController, level);
+                return humanGame;
         }
 
         return null;

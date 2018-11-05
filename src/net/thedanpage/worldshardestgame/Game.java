@@ -14,17 +14,16 @@ import javax.swing.Timer;
 
 import static net.thedanpage.worldshardestgame.Sound.COIN;
 
-public abstract class Game extends JPanel implements ActionListener {
+public abstract class Game<T extends Player> extends JPanel implements ActionListener {
 
     Timer t = new Timer(5, this);
-    public List<Player> population;
+    public List<T> population;
 
-    boolean goalReached = false;
+    protected boolean goalReached = false;
     boolean running = false;
 
     Controller controller;
     GameLevel level;
-    Player winningPlayer = null;
 
     public Game(Controller controller, GameLevel level) {
         this.controller = controller;
@@ -33,8 +32,9 @@ public abstract class Game extends JPanel implements ActionListener {
 
     public abstract int generationCount();
     public abstract void populationIsDead();
-    public abstract void playerIsDead(Player player);
-    public abstract List<Player> initializePopulation();
+    public abstract void playerIsDead(T player);
+    public abstract List<T> initializePopulation();
+    public abstract void playerWon(T player);
 
     public GameLevel getLevel() { return level; }
 
@@ -45,8 +45,6 @@ public abstract class Game extends JPanel implements ActionListener {
     public void paintComponent(final Graphics g) {
         super.paintComponent(g);
 
-        update(g);
-
         advanceGame();
 
         render(g);
@@ -54,16 +52,6 @@ public abstract class Game extends JPanel implements ActionListener {
         t.start();
 
         Toolkit.getDefaultToolkit().sync();
-    }
-
-    public void update(Graphics g) {
-        if(running) return;
-
-        for (var player : population) {
-            player.respawn(getLevel());
-        }
-
-        running = true;
     }
 
     private void render(Graphics g) {
@@ -82,22 +70,24 @@ public abstract class Game extends JPanel implements ActionListener {
     }
 
     public void advanceGame() {
+        if (!running) {
+            for (var player : population) {
+                player.respawn(getLevel());
+            }
+            running = true;
+        }
+
         var deadPlayerCount = 0;
         advanceDots(getLevel());
 
-        for(Player player : population) {
+        for(T player : population) {
             var nextMove = controller.getMove(this, player);
             advancePlayer(nextMove, getLevel(), player);
             if(player.isDead()) deadPlayerCount++;
         }
 
-        if(deadPlayerCount == population.size()) {
+        if(deadPlayerCount == population.size() && !goalReached) {
             populationIsDead();
-        }
-
-        if (goalReached) {
-            System.out.println("Goal Reached!");
-            System.exit(0);
         }
     }
 
@@ -105,7 +95,7 @@ public abstract class Game extends JPanel implements ActionListener {
         level.updateDots();
     }
 
-    private void checkIfCoinCollected(GameLevel level, Player player) {
+    private void checkIfCoinCollected(GameLevel level, T player) {
         if (level.coins != null) {
             for (Coin coin : level.coins) {
                 if (player.collidesWith(coin.getBounds()) && !coin.collected) {
@@ -116,25 +106,25 @@ public abstract class Game extends JPanel implements ActionListener {
         }
     }
 
-    private void checkIfGoalReached(GameLevel level, Player player) {
+    private void checkIfGoalReached(GameLevel level, T player) {
         if (level.getTileMap() != new ArrayList<Tile>()) {
             if (level.allCoinsCollected()) {
                 for (Tile t : level.getTileMap()) {
                     if (t.getType() == 3 && player.collidesWith(t.getBounds())) {
                         goalReached = true;
-                        winningPlayer = player;
+                        playerWon(player);
                     }
                 }
             }
         }
     }
 
-    private void checkIfDead(GameLevel level, Player player) {
+    private void checkIfDead(GameLevel level, T player) {
         if (!player.isDead()) {
             for (Dot dot : level.dots) {
                 if (player.collidesWith(dot.getBounds())) {
                     player.setDead(true);
-                    player.opacity = 0;
+                    player.deadByDot = true;
                 }
             }
         }
@@ -144,7 +134,7 @@ public abstract class Game extends JPanel implements ActionListener {
         }
     }
 
-    public void advancePlayer(Move move, GameLevel level, Player player) {
+    public void advancePlayer(Move move, GameLevel level, T player) {
 
         if (!player.isDead())
             player.move(move, level);

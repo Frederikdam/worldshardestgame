@@ -4,48 +4,32 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Random;
 
 public abstract class Player {
 
 	/** The X coordinate of the player. */
-	private int x;
+	public int x;
 
 	/** The Y coordinate of the player. */
-	private int y;
+	public int y;
 
-	private int moveFactor = 3;
-
-	/** True if the player is colliding with a tile above them. */
-	private boolean collidingUp;
-
-	/** True if the player is colliding with a tile below them. */
-	private boolean collidingDown;
-
-	/** True if the player is colliding with a tile to their left. */
-	private boolean collidingLeft;
-
-	/** True if the player is colliding with a tile to their right. */
-	private boolean collidingRight;
+	private int moveFactor = 1;
 
 	/** True if the player has been hit and is not allowed to move. */
 	public boolean dead;
+	public boolean deadByDot = false;
 
 	/** The opacity of the player. */
 	public double opacity;
 
 	public int nextMoveIndex = 0;
 
-	private Random rnd = new Random();
-
 	public Player() {
 		this.x = 400;
 		this.y = 300;
-		this.collidingUp = false;
-		this.collidingDown = false;
-		this.collidingLeft = false;
-		this.collidingRight = false;
 		this.dead = false;
 		this.opacity = 255;
 	}
@@ -56,6 +40,15 @@ public abstract class Player {
 
 	public void setDead(boolean dead) {
 		this.dead = dead;
+		this.opacity = 0;
+	}
+
+	public double distanceTo(Player player) {
+		var x1 = player.x;
+		var y1 = player.y;
+		var x2 = this.x;
+		var y2 = this.y;
+		return Point2D.distance(x1, y1, x2, y2);
 	}
 
 	public void draw(Graphics g) {
@@ -75,7 +68,7 @@ public abstract class Player {
 		return null;
 	}
 
-	Tile getTile(GameLevel level) {
+	public Tile getTile(GameLevel level) {
 		for (Tile t : level.getTileMap()) {
 			if (this.x/40 == t.getSnapX() && this.y/40 == t.getSnapY()) {
 				return t;
@@ -96,6 +89,7 @@ public abstract class Player {
 	public void respawn(GameLevel level) {
 		this.nextMoveIndex = 0;
 		this.dead = false;
+		this.deadByDot = false;
 		this.opacity = 255;
 		this.x = level.getSpawnPoint().x;
 		this.y = level.getSpawnPoint().y;
@@ -197,12 +191,5 @@ public abstract class Player {
 			case NEUTRAL:
 				break;
 		}
-	}
-
-	@Override
-	public String toString() {
-		return "Player [x=" + x + ", y=" + y + ", collidingUp=" + collidingUp + ", collidingDown="
-				+ collidingDown + ", collidingLeft=" + collidingLeft
-				+ ", collidingRight=" + collidingRight + ", dead=" + dead + "]";
 	}
 }
