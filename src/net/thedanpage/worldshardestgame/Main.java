@@ -16,7 +16,7 @@ public class Main {
 
     public static void main(String[] args) {
         var sound = true;
-        var test = true;
+        var test = false;
         var replay = true;
 
         var game = createGame(Algorithm.GENETIC);
@@ -76,11 +76,11 @@ public class Main {
         switch(algorithm) {
             case GENETIC:
                 var populationSize = 100;
-                var initialMoveCount = 20;
-                var mutationRate = 0.01;
+                var initialMoveCount = 5000;
+                var mutationRate = 0.1;
                 Function<Integer, Integer> mutationChange = value -> {
-                    Double newValue = value < 5000 ? value * 1.05 : value;
-                    return newValue.intValue();
+                    var newValue = value < 5000 ? value : value;
+                    return newValue;
                 };
 
                 var controller = new GeneticController();

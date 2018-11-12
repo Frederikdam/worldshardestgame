@@ -1,5 +1,9 @@
 package net.thedanpage.worldshardestgame;
 
+import net.thedanpage.worldshardestgame.graph.Edge;
+import net.thedanpage.worldshardestgame.graph.Graph;
+import net.thedanpage.worldshardestgame.graph.Node;
+
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -9,6 +13,7 @@ import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class GameLevel {
@@ -26,6 +31,8 @@ public class GameLevel {
 	
 	/** A list of all of the level's coins. **/
 	public ArrayList<Coin> coins;
+
+	public Graph graph;
 	
 	/** The area of the level, not including background tiles. */
 	Area levelArea;
@@ -39,12 +46,78 @@ public class GameLevel {
 		this.levelNum = levelNumber;
 
 		init();
+		this.graph = buildGraph();
 		System.out.println("Done initializing game level!");
 	}
 
 	public void reset() {
 		resetCoins();
 	    resetDots();
+	}
+
+	public Graph buildGraph() {
+		Graph graph = new Graph();
+		List<Node> goalNodes = new ArrayList<>();
+		for (Tile t : this.getTileMap()) {
+			if (t.getType() == 1) {
+				Node node = new Node(new Point(t.getSnapX(), t.getSnapY()));
+				graph.nodes.add(node);
+			}
+			if (t.getType() == 3) {
+				Node goal = new Node(new Point(t.getSnapX(), t.getSnapY()));
+				goalNodes.add(goal);
+			}
+		}
+		for (Node node : graph.nodes) {
+			List<Node> adjacentNodes = getAdjacentNodes(node, graph);
+			for (Node adjacent : adjacentNodes) {
+				node.addEdge(adjacent);
+			}
+		}
+		for (Node goal : goalNodes) {
+			List<Node> adjacentNodes = getAdjacentNodes(goal, graph);
+			for (Node adjacent : adjacentNodes) {
+				goal.addEdge(adjacent);
+				adjacent.addEdge(goal);
+				goal.isGoal = true;
+			}
+		}
+		for (Node goal : goalNodes) {
+			if (goal.isGoal) graph.nodes.add(goal);
+		}
+		return graph;
+	}
+
+	private List<Node> getAdjacentNodes(Node node, Graph graph) {
+		List<Node> nodes = new ArrayList<>();
+		for (Node n : graph.nodes) {
+			if(node.position.x == n.position.x && n.position.y == node.position.y + 1) {
+				nodes.add(n);
+			}
+			if(node.position.x == n.position.x && n.position.y == node.position.y - 1) {
+				nodes.add(n);
+			}
+			if(node.position.x + 1 == n.position.x && n.position.y == node.position.y) {
+				nodes.add(n);
+			}
+			if(node.position.x - 1 == n.position.x && n.position.y == node.position.y) {
+				nodes.add(n);
+			}
+
+			if(node.position.x + 1 == n.position.x && n.position.y == node.position.y + 1) {
+				nodes.add(n);
+			}
+			if(node.position.x - 1 == n.position.x && n.position.y == node.position.y - 1) {
+				nodes.add(n);
+			}
+			if(node.position.x + 1 == n.position.x && n.position.y == node.position.y - 1) {
+				nodes.add(n);
+			}
+			if(node.position.x - 1 == n.position.x && n.position.y == node.position.y + 1) {
+				nodes.add(n);
+			}
+		}
+		return nodes;
 	}
 
 	public double getDistanceToGoal(Player player) {

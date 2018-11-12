@@ -21,7 +21,7 @@ public class GeneticGame extends Game<GeneticPlayer> {
         if (getLevel().allCoinsCollected()) {
             fitness = getLevel().getDistanceToGoal(player);
         } else {
-            fitness = getLevel().getDistanceToNextCoin(player);
+            fitness = getLevel().getDistanceToNextCoin(player) + 1000;
         }
 
         if(bestPlayer == null) return fitness;
