@@ -31,14 +31,12 @@ public class QLearningGame extends Game<QLearningPlayer> {
         for(QLearningPlayer player : this.population) {
             player.respawn(getLevel());
         }
+        System.out.println(qTable.table.size());
     }
 
     @Override
     public void playerIsDead(QLearningPlayer player) {
-        int distanceToGoal = (int)getLevel().getDistanceToGoal(player);
-        int reward = distanceToGoal;
-        if (player.deadByDot) reward = -Integer.MAX_VALUE;
-        qTable.updateQvalue(reward, this);
+        var distanceToGoal = getLevel().getDistanceToGoal(player);
         System.out.println(distanceToGoal);
     }
 

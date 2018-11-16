@@ -20,7 +20,7 @@ public class Main {
 
     public static void main(String[] args) {
         var sound = true;
-        var test = false;
+        var test = true;
         var replay = true;
 
         var game = createGame(Algorithm.QLEARNING);

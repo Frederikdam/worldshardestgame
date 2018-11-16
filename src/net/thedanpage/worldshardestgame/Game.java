@@ -85,6 +85,7 @@ public abstract class Game<T extends Player> extends JPanel implements ActionLis
         for(T player : population) {
             var nextMove = controller.getMove(this, player);
             advancePlayer(nextMove, getLevel(), player);
+            controller.didMove(this, player);
             if(player.isDead()) deadPlayerCount++;
         }
 
@@ -138,8 +139,9 @@ public abstract class Game<T extends Player> extends JPanel implements ActionLis
 
     public void advancePlayer(Move move, GameLevel level, T player) {
 
-        if (!player.isDead())
+        if (!player.isDead()) {
             player.move(move, level);
+        }
 
         checkIfCoinCollected(level, player);
         checkIfGoalReached(level, player);

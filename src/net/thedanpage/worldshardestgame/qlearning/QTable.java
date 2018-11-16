@@ -32,18 +32,18 @@ public class QTable {
     Move getBestAction(QLearningGame game){
         float[] qValues = getActionsQValues(game);
 
-        float bestQ = -1;
+        float bestQ = Float.MAX_VALUE;
         Move bestMove = Move.NEUTRAL;
 
         for (Move move : Move.values()) {
             var qValue = qValues[move.ordinal()];
-            if (qValue > bestQ) {
+            if (qValue < bestQ) {
                 bestQ = qValue;
                 bestMove = move;
             }
         }
 
-        if(bestQ == 0) { bestMove = Move.RIGHT; }
+        if(bestQ == 0) { bestMove = explore(); }
 
         return bestMove;
     }
@@ -62,7 +62,7 @@ public class QTable {
         String stateStr = getGameString(game);
         float[] qValState = table.get(stateStr);
         float actionQ = qValState[move.ordinal()];
-
+        //System.out.println(Arrays.toString(qValues));
         qValues[prevAction.ordinal()] = (gameConfigs.learningRate * (reward + (gameConfigs.gammaValue * actionQ) - prevActionQ));
         table.put(prevStateStr, qValues);
     }
@@ -85,9 +85,6 @@ public class QTable {
 
     float[] getValues(QLearningGame game){
         String gameString = getGameString(game);
-        if(table.containsKey(gameString)){
-            return table.get(gameString);
-        }
-        return null;
+        return table.get(gameString);
     }
 };

@@ -47,7 +47,6 @@ public class GameLevel {
 
 		init();
 		this.graph = buildGraph();
-		System.out.println("Done initializing game level!");
 	}
 
 	public void reset() {

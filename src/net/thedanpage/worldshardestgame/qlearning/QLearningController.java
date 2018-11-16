@@ -16,4 +16,12 @@ public class QLearningController extends Controller<QLearningPlayer, QLearningGa
     public Move getMove(QLearningGame game, QLearningPlayer player) {
         return qTable.getNextAction(game);
     }
+
+    @Override
+    public void didMove(QLearningGame game, QLearningPlayer player) {
+        int distanceToGoal = (int)game.getLevel().getDistanceToGoal(player);
+        int reward = distanceToGoal;
+        if (player.deadByDot) reward = Integer.MAX_VALUE;
+        qTable.updateQvalue(reward, game);
+    }
 }
