@@ -32,12 +32,12 @@ public class QTable {
     Move getBestAction(QLearningGame game){
         float[] qValues = getActionsQValues(game);
 
-        float bestQ = Float.MAX_VALUE;
+        float bestQ = -1;
         Move bestMove = Move.NEUTRAL;
 
         for (Move move : Move.values()) {
             var qValue = qValues[move.ordinal()];
-            if (qValue < bestQ) {
+            if (qValue > bestQ) {
                 bestQ = qValue;
                 bestMove = move;
             }
