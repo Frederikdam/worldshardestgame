@@ -35,20 +35,22 @@ public class QLearningGame extends Game<QLearningPlayer> {
     }
 
     @Override
-    public void playerIsDead(QLearningPlayer player) {
+    public void playerDiedToEnemy(QLearningPlayer player) {
         var distanceToGoal = getLevel().getDistanceToGoal(player);
         System.out.println(distanceToGoal);
     }
 
     @Override
     public List<QLearningPlayer> initializePopulation() {
+        var size = 100;
         var players = new ArrayList<QLearningPlayer>();
-        players.add(new QLearningPlayer());
+        for(int i = 0; i < size; i++) {
+            players.add(new QLearningPlayer());
+        }
         return players;
     }
 
     @Override
     public void playerWon(QLearningPlayer player) {
-
     }
 }

@@ -43,9 +43,7 @@ public class GeneticGame extends Game<GeneticPlayer> {
     }
 
     @Override
-    public void playerIsDead(GeneticPlayer player) {
-        player.fitness = calculateFitness(player);
-    }
+    public void playerDiedToEnemy(GeneticPlayer player) {}
 
     @Override
     public int generationCount() {
@@ -62,6 +60,7 @@ public class GeneticGame extends Game<GeneticPlayer> {
     }
 
     public void evaluateGeneration() {
+        for(GeneticPlayer player : population) player.fitness = calculateFitness(player);
         this.generation++;
         if(this.generation % 5 == 0) {
             gameConfigs.moveCount = gameConfigs.mutationChange.apply(gameConfigs.moveCount);

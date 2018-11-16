@@ -26,7 +26,7 @@ public class HumanGame extends Game<HumanPlayer> {
     }
 
     @Override
-    public void playerIsDead(HumanPlayer player) {
+    public void playerDiedToEnemy(HumanPlayer player) {
 
     }
 

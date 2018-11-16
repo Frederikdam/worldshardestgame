@@ -20,7 +20,7 @@ public class Main {
 
     public static void main(String[] args) {
         var sound = true;
-        var test = true;
+        var test = false;
         var replay = true;
 
         var game = createGame(Algorithm.QLEARNING);
@@ -81,10 +81,10 @@ public class Main {
         switch(algorithm) {
             case GENETIC:
                 var populationSize = 100;
-                var initialMoveCount = 5000;
-                var mutationRate = 0.1;
+                var initialMoveCount = 5;
+                var mutationRate = 0.005;
                 Function<Integer, Integer> mutationChange = value -> {
-                    var newValue = value < 5000 ? value : value;
+                    var newValue = value < 5000 ? value + 4 : value;
                     return newValue;
                 };
 
@@ -99,9 +99,9 @@ public class Main {
                 return humanGame;
             case QLEARNING:
                 int actionRange = Move.values().length;
-                float explorationChance=0.5f;
-                float gammaValue=0.9f;
-                float learningRate=0.15f;
+                float explorationChance=0.1f;
+                float gammaValue=0.5f;
+                float learningRate=1f;
                 var qLearningGameConfigs = new QLearningGameConfigs(actionRange, explorationChance, gammaValue, learningRate);
                 var qTable = new QTable(qLearningGameConfigs);
                 var qLearningController = new QLearningController(qTable);

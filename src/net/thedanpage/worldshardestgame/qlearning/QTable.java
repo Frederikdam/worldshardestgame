@@ -43,8 +43,6 @@ public class QTable {
             }
         }
 
-        if(bestQ == 0) { bestMove = explore(); }
-
         return bestMove;
     }
 
