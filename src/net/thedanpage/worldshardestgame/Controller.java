@@ -5,6 +5,6 @@ import net.thedanpage.worldshardestgame.GameLevel;
 import net.thedanpage.worldshardestgame.Move;
 import net.thedanpage.worldshardestgame.Player;
 
-public abstract class Controller<T extends Player> {
-    public abstract Move getMove(Game game, T player);
+public abstract class Controller<T extends Player, K extends Game> {
+    public abstract Move getMove(K game, T player);
 }

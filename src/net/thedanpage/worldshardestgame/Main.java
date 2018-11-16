@@ -8,6 +8,8 @@ import net.thedanpage.worldshardestgame.human.HumanGame;
 import net.thedanpage.worldshardestgame.human.HumanPlayer;
 import net.thedanpage.worldshardestgame.qlearning.QLearningController;
 import net.thedanpage.worldshardestgame.qlearning.QLearningGame;
+import net.thedanpage.worldshardestgame.qlearning.QLearningGameConfigs;
+import net.thedanpage.worldshardestgame.qlearning.QTable;
 
 import java.util.ArrayList;
 import java.util.function.Function;
@@ -96,8 +98,14 @@ public class Main {
                 var humanGame = new HumanGame(humanController, level);
                 return humanGame;
             case QLEARNING:
-                var qLearningController = new QLearningController();
-                var qLearningGame = new QLearningGame(qLearningController, level);
+                int actionRange = Move.values().length;
+                float explorationChance=0.1f;
+                float gammaValue=0.9f;
+                float learningRate=0.15f;
+                var qLearningGameConfigs = new QLearningGameConfigs(actionRange, explorationChance, gammaValue, learningRate);
+                var qTable = new QTable(qLearningGameConfigs);
+                var qLearningController = new QLearningController(qTable);
+                var qLearningGame = new QLearningGame(qLearningController, level, qTable);
                 return qLearningGame;
         }
 

@@ -22,8 +22,10 @@ public abstract class Game<T extends Player> extends JPanel implements ActionLis
     protected boolean goalReached = false;
     boolean running = false;
 
-    Controller controller;
+    public Controller controller;
     GameLevel level;
+
+    private Game gameCopy;
 
     public Game(Controller controller, GameLevel level) {
         this.controller = controller;

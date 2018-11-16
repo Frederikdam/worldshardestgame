@@ -10,10 +10,10 @@ import java.awt.event.KeyListener;
 
 import static java.awt.event.KeyEvent.*;
 
-public class HumanController extends Controller<HumanPlayer> {
+public class HumanController extends Controller<HumanPlayer, HumanGame> {
 
     @Override
-    public Move getMove(Game game, HumanPlayer player) {
+    public Move getMove(HumanGame game, HumanPlayer player) {
         return Move.NEUTRAL;
     }
 }
