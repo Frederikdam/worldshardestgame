@@ -6,6 +6,8 @@ import net.thedanpage.worldshardestgame.genetic.GeneticGameConfigs;
 import net.thedanpage.worldshardestgame.human.HumanController;
 import net.thedanpage.worldshardestgame.human.HumanGame;
 import net.thedanpage.worldshardestgame.human.HumanPlayer;
+import net.thedanpage.worldshardestgame.qlearning.QLearningController;
+import net.thedanpage.worldshardestgame.qlearning.QLearningGame;
 
 import java.util.ArrayList;
 import java.util.function.Function;
@@ -19,7 +21,7 @@ public class Main {
         var test = false;
         var replay = true;
 
-        var game = createGame(Algorithm.GENETIC);
+        var game = createGame(Algorithm.QLEARNING);
 
         if (sound) MusicPlayer.play(BACKGROUND);
 
@@ -66,7 +68,8 @@ public class Main {
 
     private enum Algorithm {
         GENETIC,
-        HUMAN
+        HUMAN,
+        QLEARNING
     }
 
     private static Game createGame(Algorithm algorithm) {
@@ -92,6 +95,10 @@ public class Main {
                 var humanController = new HumanController();
                 var humanGame = new HumanGame(humanController, level);
                 return humanGame;
+            case QLEARNING:
+                var qLearningController = new QLearningController();
+                var qLearningGame = new QLearningGame(qLearningController, level);
+                return qLearningGame;
         }
 
         return null;
