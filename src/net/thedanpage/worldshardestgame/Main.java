@@ -19,7 +19,7 @@ import static net.thedanpage.worldshardestgame.Sound.BACKGROUND;
 public class Main {
 
     public static void main(String[] args) {
-        var sound = true;
+        var sound = false;
         var test = true;
         var replay = true;
 
@@ -110,6 +110,7 @@ public class Main {
                 return qLearningGame;
             case ASTAR:
                 level.buildGraph();
+                level.removeDotsFromGraph();
                 return new HumanGame(new HumanController(), level);
         }
 

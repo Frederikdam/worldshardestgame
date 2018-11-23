@@ -1,6 +1,5 @@
 package net.thedanpage.worldshardestgame;
 
-import net.thedanpage.worldshardestgame.graph.Edge;
 import net.thedanpage.worldshardestgame.graph.Graph;
 import net.thedanpage.worldshardestgame.graph.Node;
 
@@ -57,6 +56,7 @@ public class GameLevel {
 		Graph graph = new Graph();
 		List<Node> goalNodes = new ArrayList<>();
 		System.out.println("Start building graph");
+		var playerSize = 28;
 		for (Tile t : this.getTileMap()) {
 			if (t.getType() == 1 || t.getType() == 2) {
 				for (int x = t.getX(); x < t.getX() + t.getBounds().getWidth(); x++) {
@@ -82,6 +82,27 @@ public class GameLevel {
 		System.out.println("Number of goals: " + goalNodes.size());
 		System.out.println("Start building edges for regular nodes");
 		for (Node node : graph.nodes) {
+			var x = node.position.x;
+			var y = node.position.y;
+			if(graph.getNodeFromPosition(new Point(x,y-1)) == null) {
+				//top
+				graph.markNodesAsWallUpDown(node.position, new Point(x, y + (playerSize / 2)));
+			}
+			if(graph.getNodeFromPosition(new Point(x,y+1)) == null) {
+				//bottom
+				graph.markNodesAsWallDownUp(node.position, new Point(x, y - (playerSize / 2)));
+			}
+			if(graph.getNodeFromPosition(new Point(x-1,y)) == null) {
+				//left
+				graph.markNodesAsWallLeftRight(node.position, new Point(x + (playerSize / 2), y));
+			}
+			if(graph.getNodeFromPosition(new Point(x+1,y)) == null) {
+				//right
+				graph.markNodesAsWallRightLeft(node.position, new Point(x - (playerSize / 2), y));
+			}
+		}
+		for(Node node : new ArrayList<>(graph.nodes)) if (node.isWall) graph.removeNode(node);
+		for (Node node : graph.nodes) {
 			List<Node> adjacentNodes = getAdjacentNodes(node, graph);
 			for (Node adjacent : adjacentNodes) {
 				node.addEdge(adjacent);
@@ -90,6 +111,22 @@ public class GameLevel {
 		System.out.println("Finished building edges for regular nodes");
 		System.out.println("Start building edges for goal nodes");
 		for (Node goal : goalNodes) {
+			if(graph.getNodeFromPosition(new Point(goal.position.x - (playerSize / 2) - 1, goal.position.y)) != null) {
+				//goal is right side
+				goal.position.x = goal.position.x - (playerSize / 2);
+			}
+			if(graph.getNodeFromPosition(new Point(goal.position.x + (playerSize / 2) + 1, goal.position.y)) != null) {
+				//goal is left side
+				goal.position.x = goal.position.x + (playerSize / 2);
+			}
+			if(graph.getNodeFromPosition(new Point(goal.position.x, goal.position.y - (playerSize / 2) - 1)) != null) {
+				//goal is up side
+				goal.position.y = goal.position.y - (playerSize / 2);
+			}
+			if(graph.getNodeFromPosition(new Point(goal.position.x, goal.position.y + (playerSize / 2) + 1)) != null) {
+				//goal is down side
+				goal.position.y = goal.position.y + (playerSize / 2);
+			}
 			List<Node> adjacentNodes = getAdjacentNodes(goal, graph);
 			for (Node adjacent : adjacentNodes) {
 				goal.addEdge(adjacent);
@@ -100,9 +137,13 @@ public class GameLevel {
 		System.out.println("Finished building edges for goal nodes");
 		System.out.println("Start adding goal nodes to graph");
 		for (Node goal : goalNodes) {
-			if (goal.isGoal) graph.addNode(goal);
+			if (goal.isGoal) {
+				graph.addNode(goal);
+				System.out.println("Goal: " + goal.position.x + "," + goal.position.y);
+			}
 		}
 		System.out.println("Finished adding goal nodes to graph");
+		System.out.println("Total nodes: " + graph.nodes.size());
 		this.graph = graph;
 	}
 
@@ -127,6 +168,24 @@ public class GameLevel {
 		if (adj7 != null) nodes.add(adj7);
 		if (adj8 != null) nodes.add(adj8);
 		return nodes;
+	}
+
+	public void removeDotsFromGraph() {
+		for (Dot dot : dots) {
+			var x = (int)dot.getBounds().getX();
+			var y = (int)dot.getBounds().getY();
+			var size = dot.getBounds().getWidth();
+
+			for (int xPos = x; xPos < x+size; xPos++) {
+				for(int yPos = y; yPos < y+size; yPos++) {
+					var node = graph.getNodeFromPosition(new Point(xPos, yPos));
+					if (node != null) {
+						node.invalidate();
+						graph.removeNode(node);
+					}
+				}
+			}
+		}
 	}
 
 	public double getDistanceToGoal(Player player) {
