@@ -42,7 +42,7 @@ public class QLearningGame extends Game<QLearningPlayer> {
 
     @Override
     public List<QLearningPlayer> initializePopulation() {
-        var size = 100;
+        var size = 1;
         var players = new ArrayList<QLearningPlayer>();
         for(int i = 0; i < size; i++) {
             players.add(new QLearningPlayer());

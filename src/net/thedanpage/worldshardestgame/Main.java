@@ -99,9 +99,9 @@ public class Main {
                 return humanGame;
             case QLEARNING:
                 int actionRange = Move.values().length;
-                float explorationChance=0.1f;
-                float gammaValue=0.5f;
-                float learningRate=1f;
+                float explorationChance=0.2f;
+                float gammaValue=0.1f;
+                float learningRate=0.6f;
                 var qLearningGameConfigs = new QLearningGameConfigs(actionRange, explorationChance, gammaValue, learningRate);
                 var qTable = new QTable(qLearningGameConfigs);
                 var qLearningController = new QLearningController(qTable);

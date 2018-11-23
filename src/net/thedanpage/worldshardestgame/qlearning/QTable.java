@@ -1,4 +1,5 @@
 package net.thedanpage.worldshardestgame.qlearning;
+import net.thedanpage.worldshardestgame.Dot;
 import net.thedanpage.worldshardestgame.Game;
 import net.thedanpage.worldshardestgame.Move;
 
@@ -12,25 +13,40 @@ public class QTable {
     QLearningGameConfigs gameConfigs;
     Random randomGenerator = new Random();
     HashMap<String, float[]> table = new HashMap<>();
-    QLearningGame prevState;
+    String prevState;
     Move prevAction;
+    String lastPosition = "";
 
     public QTable(QLearningGameConfigs configs) {
         this.gameConfigs = configs;
     }
 
     Move getNextAction(QLearningGame game){
-        prevState = game;
+        String gameString = getGameString(game);
+        prevState = gameString;
         if(randomGenerator.nextFloat()<gameConfigs.explorationChance){
             prevAction=explore();
         } else {
-            prevAction=getBestAction(game);
+            prevAction=getBestAction(gameString);
         }
+        lastPosition = getPlayerPosition(game);
         return prevAction;
     }
 
-    Move getBestAction(QLearningGame game){
-        float[] qValues = getActionsQValues(game);
+    String getPlayerPosition(QLearningGame game) {
+        return game.population.get(0).x + ":" + game.population.get(0).y;
+    }
+
+    String getEnemyPositions(QLearningGame game) {
+        String result = "";
+        for(Dot dot : game.getLevel().dots) {
+            result += dot.getBounds().getCenterX() + ":" + dot.getBounds().getCenterY() + ",";
+        }
+        return result;
+    }
+
+    Move getBestAction(String gameString){
+        float[] qValues = getActionsQValues(gameString);
 
         float bestQ = -1;
         Move bestMove = Move.NEUTRAL;
@@ -43,6 +59,8 @@ public class QTable {
             }
         }
 
+        if(bestQ == 0) return Move.RIGHT;
+
         return bestMove;
     }
 
@@ -52,37 +70,41 @@ public class QTable {
     }
 
     void updateQvalue(int reward, QLearningGame game) {
-        String prevStateStr = getGameString(prevState);
         float[] qValues = getActionsQValues(prevState);
         float prevActionQ = qValues[prevAction.ordinal()];
 
-        Move move = getBestAction(game);
         String stateStr = getGameString(game);
+        Move move = getBestAction(stateStr);
         float[] qValState = table.get(stateStr);
         float actionQ = qValState[move.ordinal()];
         //System.out.println(Arrays.toString(qValues));
-        qValues[prevAction.ordinal()] = (gameConfigs.learningRate * (reward + (gameConfigs.gammaValue * actionQ) - prevActionQ));
-        table.put(prevStateStr, qValues);
+        if (lastPosition.equals(getPlayerPosition(game)) && prevAction != Move.NEUTRAL) {
+            qValues[prevAction.ordinal()] = -1;
+        } else {
+            qValues[prevAction.ordinal()] = gameConfigs.learningRate * (reward + (gameConfigs.gammaValue * actionQ) - prevActionQ);
+        }
+        table.put(prevState, qValues);
     }
 
     String getGameString(QLearningGame game){
-        var player = game.population.get(0);
-        return player.x + "," + player.y;
+        var gameString = "";
+        gameString += getPlayerPosition(game);
+        gameString += getEnemyPositions(game);
+        return gameString;
     }
 
-    float[] getActionsQValues(QLearningGame game){
-        float[] actions = getValues(game);
+    float[] getActionsQValues(String gameString){
+        float[] actions = getValues(gameString);
         if(actions==null){
             float[] initialActions = new float[gameConfigs.actionRange];
             for(int i=0;i<gameConfigs.actionRange;i++) initialActions[i]=0.f;
-            table.put(getGameString(game), initialActions);
+            table.put(gameString, initialActions);
             return initialActions;
         }
         return actions;
     }
 
-    float[] getValues(QLearningGame game){
-        String gameString = getGameString(game);
+    float[] getValues(String gameString){
         return table.get(gameString);
     }
 };

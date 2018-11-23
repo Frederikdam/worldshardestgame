@@ -57,22 +57,39 @@ public class GameLevel {
 	public Graph buildGraph() {
 		Graph graph = new Graph();
 		List<Node> goalNodes = new ArrayList<>();
+		System.out.println("Start building graph");
 		for (Tile t : this.getTileMap()) {
-			if (t.getType() == 1) {
-				Node node = new Node(new Point(t.getSnapX(), t.getSnapY()));
-				graph.nodes.add(node);
+			if (t.getType() == 1 || t.getType() == 2) {
+				for (int x = t.getX(); x < t.getX() + t.getBounds().getWidth(); x++) {
+					for (int y = t.getY(); y < t.getY() + t.getBounds().getHeight(); y++) {
+						Node node = new Node(new Point(x, y));
+						graph.nodes.add(node);
+					}
+				}
+				System.out.println("Done building a regular node");
 			}
 			if (t.getType() == 3) {
-				Node goal = new Node(new Point(t.getSnapX(), t.getSnapY()));
-				goalNodes.add(goal);
+				for (int x = t.getX(); x < t.getX() + t.getBounds().getWidth(); x++) {
+					for (int y = t.getY(); y < t.getY() + t.getBounds().getHeight(); y++) {
+						Node goal = new Node(new Point(x,y));
+						goalNodes.add(goal);
+					}
+				}
+				System.out.println("Done building a goal node");
 			}
 		}
+		System.out.println("Finished building nodes");
+		System.out.println("Number of nodes: " + graph.nodes.size());
+		System.out.println("Number of goals: " + goalNodes.size());
+		System.out.println("Start building edges for regular nodes");
 		for (Node node : graph.nodes) {
 			List<Node> adjacentNodes = getAdjacentNodes(node, graph);
 			for (Node adjacent : adjacentNodes) {
 				node.addEdge(adjacent);
 			}
 		}
+		System.out.println("Finished building edges for regular nodes");
+		System.out.println("Start building edges for goal nodes");
 		for (Node goal : goalNodes) {
 			List<Node> adjacentNodes = getAdjacentNodes(goal, graph);
 			for (Node adjacent : adjacentNodes) {
@@ -81,38 +98,46 @@ public class GameLevel {
 				goal.isGoal = true;
 			}
 		}
+		System.out.println("Finished building edges for goal nodes");
+		System.out.println("Start adding goal nodes to graph");
 		for (Node goal : goalNodes) {
 			if (goal.isGoal) graph.nodes.add(goal);
 		}
+		System.out.println("Finished adding goal nodes to graph");
 		return graph;
 	}
 
 	private List<Node> getAdjacentNodes(Node node, Graph graph) {
 		List<Node> nodes = new ArrayList<>();
+		var x = node.position.x;
+		var y = node.position.y;
 		for (Node n : graph.nodes) {
-			if(node.position.x == n.position.x && n.position.y == node.position.y + 1) {
+			var nodeX = n.position.x;
+			var nodeY = n.position.y;
+
+			if(x == nodeX && nodeY == y + 1) {
 				nodes.add(n);
 			}
-			if(node.position.x == n.position.x && n.position.y == node.position.y - 1) {
+			if(x == nodeX && nodeY == y - 1) {
 				nodes.add(n);
 			}
-			if(node.position.x + 1 == n.position.x && n.position.y == node.position.y) {
+			if(x + 1 == nodeX && nodeY == y) {
 				nodes.add(n);
 			}
-			if(node.position.x - 1 == n.position.x && n.position.y == node.position.y) {
+			if(x - 1 == nodeX && nodeY == y) {
 				nodes.add(n);
 			}
 
-			if(node.position.x + 1 == n.position.x && n.position.y == node.position.y + 1) {
+			if(x + 1 == nodeX && nodeY == y + 1) {
 				nodes.add(n);
 			}
-			if(node.position.x - 1 == n.position.x && n.position.y == node.position.y - 1) {
+			if(x - 1 == nodeX && nodeY == y - 1) {
 				nodes.add(n);
 			}
-			if(node.position.x + 1 == n.position.x && n.position.y == node.position.y - 1) {
+			if(x + 1 == nodeX && nodeY == y - 1) {
 				nodes.add(n);
 			}
-			if(node.position.x - 1 == n.position.x && n.position.y == node.position.y + 1) {
+			if(x - 1 == nodeX && nodeY == y + 1) {
 				nodes.add(n);
 			}
 		}
