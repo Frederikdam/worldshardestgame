@@ -46,7 +46,6 @@ public class GameLevel {
 		this.levelNum = levelNumber;
 
 		init();
-		this.graph = buildGraph();
 	}
 
 	public void reset() {
@@ -54,7 +53,7 @@ public class GameLevel {
 	    resetDots();
 	}
 
-	public Graph buildGraph() {
+	public void buildGraph() {
 		Graph graph = new Graph();
 		List<Node> goalNodes = new ArrayList<>();
 		System.out.println("Start building graph");
@@ -63,7 +62,7 @@ public class GameLevel {
 				for (int x = t.getX(); x < t.getX() + t.getBounds().getWidth(); x++) {
 					for (int y = t.getY(); y < t.getY() + t.getBounds().getHeight(); y++) {
 						Node node = new Node(new Point(x, y));
-						graph.nodes.add(node);
+						graph.addNode(node);
 					}
 				}
 				System.out.println("Done building a regular node");
@@ -101,46 +100,32 @@ public class GameLevel {
 		System.out.println("Finished building edges for goal nodes");
 		System.out.println("Start adding goal nodes to graph");
 		for (Node goal : goalNodes) {
-			if (goal.isGoal) graph.nodes.add(goal);
+			if (goal.isGoal) graph.addNode(goal);
 		}
 		System.out.println("Finished adding goal nodes to graph");
-		return graph;
+		this.graph = graph;
 	}
 
 	private List<Node> getAdjacentNodes(Node node, Graph graph) {
 		List<Node> nodes = new ArrayList<>();
 		var x = node.position.x;
 		var y = node.position.y;
-		for (Node n : graph.nodes) {
-			var nodeX = n.position.x;
-			var nodeY = n.position.y;
-
-			if(x == nodeX && nodeY == y + 1) {
-				nodes.add(n);
-			}
-			if(x == nodeX && nodeY == y - 1) {
-				nodes.add(n);
-			}
-			if(x + 1 == nodeX && nodeY == y) {
-				nodes.add(n);
-			}
-			if(x - 1 == nodeX && nodeY == y) {
-				nodes.add(n);
-			}
-
-			if(x + 1 == nodeX && nodeY == y + 1) {
-				nodes.add(n);
-			}
-			if(x - 1 == nodeX && nodeY == y - 1) {
-				nodes.add(n);
-			}
-			if(x + 1 == nodeX && nodeY == y - 1) {
-				nodes.add(n);
-			}
-			if(x - 1 == nodeX && nodeY == y + 1) {
-				nodes.add(n);
-			}
-		}
+		var adj1 = graph.getNodeFromPosition(new Point(x,y+1));
+		var adj2 = graph.getNodeFromPosition(new Point(x,y-1));
+		var adj3 = graph.getNodeFromPosition(new Point(x+1,y));
+		var adj4 = graph.getNodeFromPosition(new Point(x-1,y));
+		var adj5 = graph.getNodeFromPosition(new Point(x+1,y+1));
+		var adj6 = graph.getNodeFromPosition(new Point(x-1,y-1));
+		var adj7 = graph.getNodeFromPosition(new Point(x-1,y+1));
+		var adj8 = graph.getNodeFromPosition(new Point(x+1,y-1));
+		if (adj1 != null) nodes.add(adj1);
+		if (adj2 != null) nodes.add(adj2);
+		if (adj3 != null) nodes.add(adj3);
+		if (adj4 != null) nodes.add(adj4);
+		if (adj5 != null) nodes.add(adj5);
+		if (adj6 != null) nodes.add(adj6);
+		if (adj7 != null) nodes.add(adj7);
+		if (adj8 != null) nodes.add(adj8);
 		return nodes;
 	}
 

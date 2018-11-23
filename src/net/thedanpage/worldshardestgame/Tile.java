@@ -85,7 +85,7 @@ public class Tile {
 	
 	
 	public Rectangle getBounds() {
-		return new Rectangle(this.x, this.y, 39, 39);
+		return new Rectangle(this.x, this.y, 40, 40);
 	}
 	
 	

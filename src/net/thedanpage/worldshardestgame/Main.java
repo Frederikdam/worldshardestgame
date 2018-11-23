@@ -20,10 +20,10 @@ public class Main {
 
     public static void main(String[] args) {
         var sound = true;
-        var test = false;
+        var test = true;
         var replay = true;
 
-        var game = createGame(Algorithm.QLEARNING);
+        var game = createGame(Algorithm.ASTAR);
 
         if (sound) MusicPlayer.play(BACKGROUND);
 
@@ -71,7 +71,8 @@ public class Main {
     private enum Algorithm {
         GENETIC,
         HUMAN,
-        QLEARNING
+        QLEARNING,
+        ASTAR
     }
 
     private static Game createGame(Algorithm algorithm) {
@@ -107,6 +108,9 @@ public class Main {
                 var qLearningController = new QLearningController(qTable);
                 var qLearningGame = new QLearningGame(qLearningController, level, qTable);
                 return qLearningGame;
+            case ASTAR:
+                level.buildGraph();
+                return new HumanGame(new HumanController(), level);
         }
 
         return null;
