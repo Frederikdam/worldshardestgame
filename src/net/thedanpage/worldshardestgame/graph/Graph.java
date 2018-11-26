@@ -17,9 +17,12 @@ public class Graph {
         this.nodeArray = new Node[1000][1000];
     }
 
-    public Graph(Graph clone) {
-        this.nodes = new ArrayList<>(clone.nodes);
-        this.nodeArray = clone.nodeArray.clone();
+    public Graph clone() {
+        var clone = new Graph();
+        for (Node node : this.nodes) {
+            clone.addNode(new Node(new Point(node.position.x, node.position.y)));
+        }
+        return clone;
     }
 
     public void addNode(Node node) {
