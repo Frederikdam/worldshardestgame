@@ -22,7 +22,7 @@ public class Main {
 
     public static void main(String[] args) {
         var sound = false;
-        var test = true;
+        var test = false;
         var replay = true;
 
         var game = createGame(Algorithm.ASTAR);
