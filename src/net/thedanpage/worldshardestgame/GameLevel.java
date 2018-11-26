@@ -174,10 +174,11 @@ public class GameLevel {
 		for (Dot dot : dots) {
 			var x = (int)dot.getBounds().getX();
 			var y = (int)dot.getBounds().getY();
-			var size = dot.getBounds().getWidth();
+			var dotSize = dot.getBounds().getWidth();
+			var playerSize = 28;
 
-			for (int xPos = x; xPos < x+size; xPos++) {
-				for(int yPos = y; yPos < y+size; yPos++) {
+			for (int xPos = x-(playerSize/2); xPos < x+playerSize+dotSize; xPos++) {
+				for(int yPos = y-(playerSize/2); yPos < y+playerSize+dotSize; yPos++) {
 					var node = graph.getNodeFromPosition(new Point(xPos, yPos));
 					if (node != null) {
 						node.invalidate();
