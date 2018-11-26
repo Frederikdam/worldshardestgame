@@ -1,6 +1,5 @@
 package net.thedanpage.worldshardestgame;
 
-import net.thedanpage.worldshardestgame.graph.Edge;
 import net.thedanpage.worldshardestgame.graph.Graph;
 import net.thedanpage.worldshardestgame.graph.Node;
 
@@ -46,8 +45,6 @@ public class GameLevel {
 		this.levelNum = levelNumber;
 
 		init();
-		this.graph = buildGraph();
-		System.out.println("Done initializing game level!");
 	}
 
 	public void reset() {
@@ -55,26 +52,81 @@ public class GameLevel {
 	    resetDots();
 	}
 
-	public Graph buildGraph() {
+	public void buildGraph() {
 		Graph graph = new Graph();
 		List<Node> goalNodes = new ArrayList<>();
+		System.out.println("Start building graph");
+		var playerSize = 28;
 		for (Tile t : this.getTileMap()) {
-			if (t.getType() == 1) {
-				Node node = new Node(new Point(t.getSnapX(), t.getSnapY()));
-				graph.nodes.add(node);
+			if (t.getType() == 1 || t.getType() == 2) {
+				for (int x = t.getX(); x < t.getX() + t.getBounds().getWidth(); x++) {
+					for (int y = t.getY(); y < t.getY() + t.getBounds().getHeight(); y++) {
+						Node node = new Node(new Point(x, y));
+						graph.addNode(node);
+					}
+				}
+				System.out.println("Done building a regular node");
 			}
 			if (t.getType() == 3) {
-				Node goal = new Node(new Point(t.getSnapX(), t.getSnapY()));
-				goalNodes.add(goal);
+				for (int x = t.getX(); x < t.getX() + t.getBounds().getWidth(); x++) {
+					for (int y = t.getY(); y < t.getY() + t.getBounds().getHeight(); y++) {
+						Node goal = new Node(new Point(x,y));
+						goalNodes.add(goal);
+					}
+				}
+				System.out.println("Done building a goal node");
 			}
 		}
+		System.out.println("Finished building nodes");
+		System.out.println("Number of nodes: " + graph.nodes.size());
+		System.out.println("Number of goals: " + goalNodes.size());
+		System.out.println("Start building edges for regular nodes");
+		for (Node node : graph.nodes) {
+			var x = node.position.x;
+			var y = node.position.y;
+			if(graph.getNodeFromPosition(new Point(x,y-1)) == null) {
+				//top
+				graph.markNodesAsWallUpDown(node.position, new Point(x, y + (playerSize / 2)));
+			}
+			if(graph.getNodeFromPosition(new Point(x,y+1)) == null) {
+				//bottom
+				graph.markNodesAsWallDownUp(node.position, new Point(x, y - (playerSize / 2)));
+			}
+			if(graph.getNodeFromPosition(new Point(x-1,y)) == null) {
+				//left
+				graph.markNodesAsWallLeftRight(node.position, new Point(x + (playerSize / 2), y));
+			}
+			if(graph.getNodeFromPosition(new Point(x+1,y)) == null) {
+				//right
+				graph.markNodesAsWallRightLeft(node.position, new Point(x - (playerSize / 2), y));
+			}
+		}
+		for(Node node : new ArrayList<>(graph.nodes)) if (node.isWall) graph.removeNode(node);
 		for (Node node : graph.nodes) {
 			List<Node> adjacentNodes = getAdjacentNodes(node, graph);
 			for (Node adjacent : adjacentNodes) {
 				node.addEdge(adjacent);
 			}
 		}
+		System.out.println("Finished building edges for regular nodes");
+		System.out.println("Start building edges for goal nodes");
 		for (Node goal : goalNodes) {
+			if(graph.getNodeFromPosition(new Point(goal.position.x - (playerSize / 2) - 1, goal.position.y)) != null) {
+				//goal is right side
+				goal.position.x = goal.position.x - (playerSize / 2);
+			}
+			if(graph.getNodeFromPosition(new Point(goal.position.x + (playerSize / 2) + 1, goal.position.y)) != null) {
+				//goal is left side
+				goal.position.x = goal.position.x + (playerSize / 2);
+			}
+			if(graph.getNodeFromPosition(new Point(goal.position.x, goal.position.y - (playerSize / 2) - 1)) != null) {
+				//goal is up side
+				goal.position.y = goal.position.y - (playerSize / 2);
+			}
+			if(graph.getNodeFromPosition(new Point(goal.position.x, goal.position.y + (playerSize / 2) + 1)) != null) {
+				//goal is down side
+				goal.position.y = goal.position.y + (playerSize / 2);
+			}
 			List<Node> adjacentNodes = getAdjacentNodes(goal, graph);
 			for (Node adjacent : adjacentNodes) {
 				goal.addEdge(adjacent);
@@ -82,42 +134,59 @@ public class GameLevel {
 				goal.isGoal = true;
 			}
 		}
+		System.out.println("Finished building edges for goal nodes");
+		System.out.println("Start adding goal nodes to graph");
 		for (Node goal : goalNodes) {
-			if (goal.isGoal) graph.nodes.add(goal);
+			if (goal.isGoal) {
+				graph.addNode(goal);
+				System.out.println("Goal: " + goal.position.x + "," + goal.position.y);
+			}
 		}
-		return graph;
+		System.out.println("Finished adding goal nodes to graph");
+		System.out.println("Total nodes: " + graph.nodes.size());
+		this.graph = graph;
 	}
 
 	private List<Node> getAdjacentNodes(Node node, Graph graph) {
 		List<Node> nodes = new ArrayList<>();
-		for (Node n : graph.nodes) {
-			if(node.position.x == n.position.x && n.position.y == node.position.y + 1) {
-				nodes.add(n);
-			}
-			if(node.position.x == n.position.x && n.position.y == node.position.y - 1) {
-				nodes.add(n);
-			}
-			if(node.position.x + 1 == n.position.x && n.position.y == node.position.y) {
-				nodes.add(n);
-			}
-			if(node.position.x - 1 == n.position.x && n.position.y == node.position.y) {
-				nodes.add(n);
-			}
+		var x = node.position.x;
+		var y = node.position.y;
+		var adj1 = graph.getNodeFromPosition(new Point(x,y+1));
+		var adj2 = graph.getNodeFromPosition(new Point(x,y-1));
+		var adj3 = graph.getNodeFromPosition(new Point(x+1,y));
+		var adj4 = graph.getNodeFromPosition(new Point(x-1,y));
+		var adj5 = graph.getNodeFromPosition(new Point(x+1,y+1));
+		var adj6 = graph.getNodeFromPosition(new Point(x-1,y-1));
+		var adj7 = graph.getNodeFromPosition(new Point(x-1,y+1));
+		var adj8 = graph.getNodeFromPosition(new Point(x+1,y-1));
+		if (adj1 != null) nodes.add(adj1);
+		if (adj2 != null) nodes.add(adj2);
+		if (adj3 != null) nodes.add(adj3);
+		if (adj4 != null) nodes.add(adj4);
+		if (adj5 != null) nodes.add(adj5);
+		if (adj6 != null) nodes.add(adj6);
+		if (adj7 != null) nodes.add(adj7);
+		if (adj8 != null) nodes.add(adj8);
+		return nodes;
+	}
 
-			if(node.position.x + 1 == n.position.x && n.position.y == node.position.y + 1) {
-				nodes.add(n);
-			}
-			if(node.position.x - 1 == n.position.x && n.position.y == node.position.y - 1) {
-				nodes.add(n);
-			}
-			if(node.position.x + 1 == n.position.x && n.position.y == node.position.y - 1) {
-				nodes.add(n);
-			}
-			if(node.position.x - 1 == n.position.x && n.position.y == node.position.y + 1) {
-				nodes.add(n);
+	public void removeDotsFromGraph() {
+		for (Dot dot : dots) {
+			var x = (int)dot.getBounds().getX();
+			var y = (int)dot.getBounds().getY();
+			var dotSize = dot.getBounds().getWidth();
+			var playerSize = 28;
+
+			for (int xPos = x-(playerSize/2); xPos < x+playerSize+dotSize; xPos++) {
+				for(int yPos = y-(playerSize/2); yPos < y+playerSize+dotSize; yPos++) {
+					var node = graph.getNodeFromPosition(new Point(xPos, yPos));
+					if (node != null) {
+						node.invalidate();
+						graph.removeNode(node);
+					}
+				}
 			}
 		}
-		return nodes;
 	}
 
 	public double getDistanceToGoal(Player player) {

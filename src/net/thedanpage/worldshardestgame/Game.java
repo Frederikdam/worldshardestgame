@@ -22,7 +22,7 @@ public abstract class Game<T extends Player> extends JPanel implements ActionLis
     protected boolean goalReached = false;
     boolean running = false;
 
-    Controller controller;
+    public Controller controller;
     GameLevel level;
 
     public Game(Controller controller, GameLevel level) {
@@ -32,7 +32,7 @@ public abstract class Game<T extends Player> extends JPanel implements ActionLis
 
     public abstract int generationCount();
     public abstract void populationIsDead();
-    public abstract void playerIsDead(T player);
+    public abstract void playerDiedToEnemy(T player);
     public abstract List<T> initializePopulation();
     public abstract void playerWon(T player);
 
@@ -83,7 +83,10 @@ public abstract class Game<T extends Player> extends JPanel implements ActionLis
         for(T player : population) {
             var nextMove = controller.getMove(this, player);
             advancePlayer(nextMove, getLevel(), player);
-            if(player.isDead()) deadPlayerCount++;
+            controller.didMove(this, player);
+            if(player.isDead()) {
+                deadPlayerCount++;
+            }
         }
 
         if(deadPlayerCount == population.size() && !goalReached) {
@@ -120,28 +123,22 @@ public abstract class Game<T extends Player> extends JPanel implements ActionLis
     }
 
     private void checkIfDead(GameLevel level, T player) {
-        if (!player.isDead()) {
-            for (Dot dot : level.dots) {
-                if (player.collidesWith(dot.getBounds())) {
-                    player.setDead(true);
-                    player.deadByDot = true;
-                }
+        for (Dot dot : level.dots) {
+            if (player.collidesWith(dot.getBounds())) {
+                player.setDead(true);
+                player.deadByDot = true;
+                playerDiedToEnemy(player);
             }
-        }
-        if (player.isDead()) {
-            playerIsDead(player);
-            player.opacity = 0;
         }
     }
 
     public void advancePlayer(Move move, GameLevel level, T player) {
-
-        if (!player.isDead())
+        if (!player.isDead()) {
             player.move(move, level);
-
-        checkIfCoinCollected(level, player);
-        checkIfGoalReached(level, player);
-        checkIfDead(level, player);
+            checkIfCoinCollected(level, player);
+            checkIfGoalReached(level, player);
+            checkIfDead(level, player);
+        }
     }
 
     public void actionPerformed(ActionEvent arg0) {

@@ -6,6 +6,10 @@ import net.thedanpage.worldshardestgame.genetic.GeneticGameConfigs;
 import net.thedanpage.worldshardestgame.human.HumanController;
 import net.thedanpage.worldshardestgame.human.HumanGame;
 import net.thedanpage.worldshardestgame.human.HumanPlayer;
+import net.thedanpage.worldshardestgame.qlearning.QLearningController;
+import net.thedanpage.worldshardestgame.qlearning.QLearningGame;
+import net.thedanpage.worldshardestgame.qlearning.QLearningGameConfigs;
+import net.thedanpage.worldshardestgame.qlearning.QTable;
 
 import java.util.ArrayList;
 import java.util.function.Function;
@@ -15,11 +19,11 @@ import static net.thedanpage.worldshardestgame.Sound.BACKGROUND;
 public class Main {
 
     public static void main(String[] args) {
-        var sound = true;
-        var test = false;
+        var sound = false;
+        var test = true;
         var replay = true;
 
-        var game = createGame(Algorithm.GENETIC);
+        var game = createGame(Algorithm.ASTAR);
 
         if (sound) MusicPlayer.play(BACKGROUND);
 
@@ -66,7 +70,9 @@ public class Main {
 
     private enum Algorithm {
         GENETIC,
-        HUMAN
+        HUMAN,
+        QLEARNING,
+        ASTAR
     }
 
     private static Game createGame(Algorithm algorithm) {
@@ -76,10 +82,10 @@ public class Main {
         switch(algorithm) {
             case GENETIC:
                 var populationSize = 100;
-                var initialMoveCount = 5000;
-                var mutationRate = 0.1;
+                var initialMoveCount = 5;
+                var mutationRate = 0.005;
                 Function<Integer, Integer> mutationChange = value -> {
-                    var newValue = value < 5000 ? value : value;
+                    var newValue = value < 5000 ? value + 4 : value;
                     return newValue;
                 };
 
@@ -92,6 +98,20 @@ public class Main {
                 var humanController = new HumanController();
                 var humanGame = new HumanGame(humanController, level);
                 return humanGame;
+            case QLEARNING:
+                int actionRange = Move.values().length;
+                float explorationChance=0.2f;
+                float gammaValue=0.1f;
+                float learningRate=0.6f;
+                var qLearningGameConfigs = new QLearningGameConfigs(actionRange, explorationChance, gammaValue, learningRate);
+                var qTable = new QTable(qLearningGameConfigs);
+                var qLearningController = new QLearningController(qTable);
+                var qLearningGame = new QLearningGame(qLearningController, level, qTable);
+                return qLearningGame;
+            case ASTAR:
+                level.buildGraph();
+                level.removeDotsFromGraph();
+                return new HumanGame(new HumanController(), level);
         }
 
         return null;

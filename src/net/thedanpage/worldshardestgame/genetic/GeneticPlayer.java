@@ -53,7 +53,7 @@ public class GeneticPlayer extends Player {
 
     public Move getNextMove() {
         if(nextMoveIndex >= this.moves.size()) {
-            this.dead = true;
+            this.setDead(true);
             return Move.NEUTRAL;
         }
         return this.moves.get(nextMoveIndex++);
