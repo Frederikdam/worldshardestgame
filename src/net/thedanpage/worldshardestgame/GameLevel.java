@@ -65,7 +65,6 @@ public class GameLevel {
 						graph.addNode(node);
 					}
 				}
-				System.out.println("Done building a regular node");
 			}
 			if (t.getType() == 3) {
 				for (int x = t.getX(); x < t.getX() + t.getBounds().getWidth(); x++) {
@@ -74,13 +73,8 @@ public class GameLevel {
 						goalNodes.add(goal);
 					}
 				}
-				System.out.println("Done building a goal node");
 			}
 		}
-		System.out.println("Finished building nodes");
-		System.out.println("Number of nodes: " + graph.nodes.size());
-		System.out.println("Number of goals: " + goalNodes.size());
-		System.out.println("Start building edges for regular nodes");
 		for (Node node : graph.nodes) {
 			var x = node.position.x;
 			var y = node.position.y;
@@ -108,8 +102,6 @@ public class GameLevel {
 				node.addEdge(adjacent);
 			}
 		}
-		System.out.println("Finished building edges for regular nodes");
-		System.out.println("Start building edges for goal nodes");
 		for (Node goal : goalNodes) {
 			if(graph.getNodeFromPosition(new Point(goal.position.x - (playerSize / 2) - 1, goal.position.y)) != null) {
 				//goal is right side
@@ -134,16 +126,12 @@ public class GameLevel {
 				goal.isGoal = true;
 			}
 		}
-		System.out.println("Finished building edges for goal nodes");
-		System.out.println("Start adding goal nodes to graph");
 		for (Node goal : goalNodes) {
 			if (goal.isGoal) {
 				graph.addNode(goal);
-				System.out.println("Goal: " + goal.position.x + "," + goal.position.y);
 			}
 		}
-		System.out.println("Finished adding goal nodes to graph");
-		System.out.println("Total nodes: " + graph.nodes.size());
+		System.out.println("Finished building graph");
 		this.graph = graph;
 	}
 

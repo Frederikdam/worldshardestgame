@@ -1,5 +1,7 @@
 package net.thedanpage.worldshardestgame;
 
+import net.thedanpage.worldshardestgame.astar.AStarController;
+import net.thedanpage.worldshardestgame.astar.AStarGame;
 import net.thedanpage.worldshardestgame.genetic.GeneticController;
 import net.thedanpage.worldshardestgame.genetic.GeneticGame;
 import net.thedanpage.worldshardestgame.genetic.GeneticGameConfigs;
@@ -109,9 +111,9 @@ public class Main {
                 var qLearningGame = new QLearningGame(qLearningController, level, qTable);
                 return qLearningGame;
             case ASTAR:
-                level.buildGraph();
-                level.removeDotsFromGraph();
-                return new HumanGame(new HumanController(), level);
+                var aStarController = new AStarController();
+                var aStarGame = new AStarGame(aStarController, level);
+                return aStarGame;
         }
 
         return null;
