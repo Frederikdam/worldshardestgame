@@ -10,4 +10,9 @@ public class AStarController extends Controller<AStarPlayer, AStarGame> {
         game.getLevel().updateGraph();
         return Move.NEUTRAL;
     }
+
+    @Override
+    public void didMove(AStarGame game, AStarPlayer player) {
+        super.didMove(game, player);
+    }
 }

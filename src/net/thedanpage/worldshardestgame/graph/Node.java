@@ -16,6 +16,7 @@ public class Node {
     private int predictedDistance;
     public boolean isGoal = false;
     public boolean isWall = false;
+    public boolean invalid = false;
 
     public Node(Point position) {
         this.position = position;
@@ -60,5 +61,6 @@ public class Node {
                 }
             }
         }
+        invalid = true;
     }
 }

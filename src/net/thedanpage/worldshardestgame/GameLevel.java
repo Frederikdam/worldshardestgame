@@ -134,7 +134,7 @@ public class GameLevel {
 			}
 		}
 		this.graph = graph;
-		this.identity = new Graph(graph);
+		this.identity = graph.clone();
 		System.out.println("Finished building graph");
 	}
 
@@ -170,7 +170,7 @@ public class GameLevel {
 
 			for (int xPos = x-(playerSize/2); xPos < x+(playerSize/2)+dotSize; xPos++) {
 				for(int yPos = y-(playerSize/2); yPos < y+(playerSize/2)+dotSize; yPos++) {
-					var node = graph.getNodeFromPosition(new Point(xPos, yPos));
+					var node = this.graph.getNodeFromPosition(new Point(xPos, yPos));
 					if (node != null) {
 						node.invalidate();
 						//graph.removeNode(node);
@@ -198,16 +198,20 @@ public class GameLevel {
 	}
 
 	public void drawGraph(Graphics g) {
-		for (Node n : graph.nodes) {
-			g.setColor(Color.RED);
-			g.fillRect(n.position.x, n.position.y, 1, 1);
+		for (Node n : this.graph.nodes) {
+			if (n.invalid) {
+				g.setColor(Color.BLUE);
+				g.fillRect(n.position.x, n.position.y, 1, 1);
+			} else {
+				g.setColor(Color.RED);
+				g.fillRect(n.position.x, n.position.y, 1, 1);
+			}
 		}
 	}
 
 	public void updateGraph() {
-		this.graph = new Graph(identity);
+		this.graph = identity.clone();
 		removeDotsFromGraph();
-		//System.out.println("Before: " + identity.nodes.size() + " After: " + graph.nodes.size());
 	}
 
 	public double getDistanceToNextCoin(Player player) {
