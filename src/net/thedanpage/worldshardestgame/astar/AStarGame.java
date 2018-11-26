@@ -12,8 +12,6 @@ public class AStarGame extends Game<AStarPlayer> {
 
     public AStarGame(Controller controller, GameLevel level) {
         super(controller, level);
-        level.buildGraph();
-        level.removeDotsFromGraph();
         this.setup();
     }
 

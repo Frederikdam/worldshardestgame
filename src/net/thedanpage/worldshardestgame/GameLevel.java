@@ -24,12 +24,14 @@ public class GameLevel {
 
 	/** A list of all of the level's tiles. */
 	private ArrayList<Tile> tileMap;
-	
+
 	/** A list of all of the level's dots. */
 	public ArrayList<Dot> dots;
 	
 	/** A list of all of the level's coins. **/
 	public ArrayList<Coin> coins;
+
+	public Graph identity;
 
 	public Graph graph;
 	
@@ -59,9 +61,9 @@ public class GameLevel {
 		var playerSize = 28;
 		for (Tile t : this.getTileMap()) {
 			if (t.getType() == 1 || t.getType() == 2) {
-				for (int x = t.getX(); x < t.getX() + t.getBounds().getWidth(); x++) {
-					for (int y = t.getY(); y < t.getY() + t.getBounds().getHeight(); y++) {
-						Node node = new Node(new Point(x, y));
+				for (int x = t.getBounds().x; x < t.getBounds().x + t.getBounds().getWidth(); x++) {
+					for (int y = t.getBounds().y; y < t.getBounds().y + t.getBounds().getHeight(); y++) {
+						Node node = new Node(new Point(x, y+22));
 						graph.addNode(node);
 					}
 				}
@@ -69,7 +71,7 @@ public class GameLevel {
 			if (t.getType() == 3) {
 				for (int x = t.getX(); x < t.getX() + t.getBounds().getWidth(); x++) {
 					for (int y = t.getY(); y < t.getY() + t.getBounds().getHeight(); y++) {
-						Node goal = new Node(new Point(x,y));
+						Node goal = new Node(new Point(x,y+22));
 						goalNodes.add(goal);
 					}
 				}
@@ -131,8 +133,9 @@ public class GameLevel {
 				graph.addNode(goal);
 			}
 		}
-		System.out.println("Finished building graph");
 		this.graph = graph;
+		this.identity = new Graph(graph);
+		System.out.println("Finished building graph");
 	}
 
 	private List<Node> getAdjacentNodes(Node node, Graph graph) {
@@ -161,12 +164,12 @@ public class GameLevel {
 	public void removeDotsFromGraph() {
 		for (Dot dot : dots) {
 			var x = (int)dot.getBounds().getX();
-			var y = (int)dot.getBounds().getY();
+			var y = (int)dot.getBounds().getY() + 22;
 			var dotSize = dot.getBounds().getWidth();
 			var playerSize = 28;
 
-			for (int xPos = x-(playerSize/2); xPos < x+playerSize+dotSize; xPos++) {
-				for(int yPos = y-(playerSize/2); yPos < y+playerSize+dotSize; yPos++) {
+			for (int xPos = x-(playerSize/2); xPos < x+(playerSize/2)+dotSize; xPos++) {
+				for(int yPos = y-(playerSize/2); yPos < y+(playerSize/2)+dotSize; yPos++) {
 					var node = graph.getNodeFromPosition(new Point(xPos, yPos));
 					if (node != null) {
 						node.invalidate();
@@ -192,6 +195,19 @@ public class GameLevel {
 			}
 		}
 		return -1;
+	}
+
+	public void drawGraph(Graphics g) {
+		for (Node n : graph.nodes) {
+			g.setColor(Color.RED);
+			g.fillRect(n.position.x, n.position.y, 1, 1);
+		}
+	}
+
+	public void updateGraph() {
+		this.graph = new Graph(identity);
+		removeDotsFromGraph();
+		System.out.println("Before: " + identity.nodes.size() + " After: " + graph.nodes.size());
 	}
 
 	public double getDistanceToNextCoin(Player player) {

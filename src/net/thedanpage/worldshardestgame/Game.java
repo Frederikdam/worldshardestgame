@@ -64,6 +64,7 @@ public abstract class Game<T extends Player> extends JPanel implements ActionLis
         g.fillRect(0, 0, 800, 22);
         g.setColor(Color.WHITE);
         g.setFont(new Font("Tahoma", Font.BOLD, 18));
+        level.drawGraph(g);
         var count = generationCount();
         drawRightJustifiedString(count > 0 ? "Generation: " + count : "", 750, 17, g);
         g.dispose();
