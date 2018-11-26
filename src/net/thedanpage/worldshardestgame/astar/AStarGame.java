@@ -20,8 +20,6 @@ public class AStarGame extends Game<AStarPlayer> {
         this.level.buildGraph();
         this.level.removeDotsFromGraph();
         this.setup();
-
-        aStarSearch(new Point(population.get(0).x,population.get(0).y), new Point(410,300));
     }
 
     @Override
@@ -58,7 +56,11 @@ public class AStarGame extends Game<AStarPlayer> {
         }
     }
 
-    public List<Point> aStarSearch(Point start, Point goal) {
+    public Stack<Node> aStarSearch(Point start, List<Point> goals) {
+
+        if(goals.size() == 0) return null;
+
+        var goal = goals.get(0);
 
         Node startNode = level.graph.getNodeFromPosition(start);
         Node endNode = level.graph.getNodeFromPosition(goal);
@@ -66,14 +68,14 @@ public class AStarGame extends Game<AStarPlayer> {
         // setup for A*
         HashMap<Node,Node> parentMap = new HashMap<Node,Node>();
         HashSet<Node> visited = new HashSet<Node>();
-        Map<Node, Integer> distances = initializeAllToInfinity();
+        Map<Node, Double> distances = initializeAllToInfinity();
 
         Queue<Node> priorityQueue = initQueue();
 
         //  enque StartNode, with distance 0
         startNode.setDistanceToStart(0);
 
-        distances.put(startNode, 0);
+        distances.put(startNode, 0.0);
         priorityQueue.add(startNode);
         Node current = null;
 
@@ -85,7 +87,7 @@ public class AStarGame extends Game<AStarPlayer> {
 
                 // if last element in PQ reached
                 if (current.equals(endNode)) {
-                    return pathTo(parentMap, endNode, startNode);
+                    return pathTo(parentMap, current, startNode);
                 }
 
                 Set<Node> neighbors = current.getAdjacents();
@@ -94,14 +96,12 @@ public class AStarGame extends Game<AStarPlayer> {
 
                         // calculate predicted distance to the end node
                         //todo: fix
-                        int predictedDistance = endNode.position.x - neighbor.position.x;
+                        double predictedDistance = Point.distance(neighbor.position.x, neighbor.position.y, endNode.position.x, endNode.position.y);
 
                         // 1. calculate distance to neighbor. 2. calculate dist from start node
-                        int neighborDistance = neighbor.position.x - current.position.x;
+                        double neighborDistance = Point.distance(current.position.x, current.position.y, neighbor.position.x, neighbor.position.y);
 
-                        //int distanceToStart = current.position.x - new Point(100, 50).x;
-
-                        int totalDistance = current.getDistanceToStart() + neighborDistance + predictedDistance;
+                        double totalDistance = current.getDistanceToStart() + neighborDistance + predictedDistance;
 
                         // check if distance is smaller
                         if(totalDistance < distances.get(neighbor) ){
@@ -119,16 +119,17 @@ public class AStarGame extends Game<AStarPlayer> {
                 }
             }
         }
-        return null;
+        goals.remove(0);
+        return aStarSearch(start, goals);
     }
 
-    private Map<Node, Integer> initializeAllToInfinity() {
-        Map<Node, Integer> distances = new HashMap<>();
+    private Map<Node, Double> initializeAllToInfinity() {
+        Map<Node, Double> distances = new HashMap<>();
 
         Iterator<Node> iter = level.graph.nodes.iterator();
         while (iter.hasNext()) {
             Node node = iter.next();
-            distances.put(node, Integer.MAX_VALUE);
+            distances.put(node, Double.POSITIVE_INFINITY);
         }
         return distances;
     }
@@ -136,26 +137,26 @@ public class AStarGame extends Game<AStarPlayer> {
     private PriorityQueue<Node> initQueue() {
         return new PriorityQueue<>(10, new Comparator<Node>() {
             public int compare(Node x, Node y) {
-                if (x.getDistanceToStart() < y.getDistanceToStart()) {
-                    return -1;
-                }
-                if (x.getDistanceToStart() > y.getDistanceToStart()) {
+                if (x.score() > y.score()) {
                     return 1;
+                }
+                if (x.score() < y.score()) {
+                    return -1;
                 }
                 return 0;
             };
         });
     }
 
-    public List<Point> pathTo(HashMap<Node,Node> parentMap, Node endNode, Node startNode) {
+    public Stack<Node> pathTo(HashMap<Node,Node> parentMap, Node current, Node startNode) {
+        Stack<Node> path = new Stack<>();
+        path.push(current);
 
-        Stack<Point> path = new Stack<>();
-        Node currentNode = endNode;
-
-        while(currentNode != startNode) {
-            currentNode = parentMap.get(currentNode);
-            path.push(currentNode.position);
+        while(current != startNode) {
+            current = parentMap.get(current);
+            path.push(current);
         }
+
         return path;
     }
 }

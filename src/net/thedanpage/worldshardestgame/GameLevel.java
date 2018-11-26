@@ -1,13 +1,10 @@
 package net.thedanpage.worldshardestgame;
 
+import net.thedanpage.worldshardestgame.graph.Edge;
 import net.thedanpage.worldshardestgame.graph.Graph;
 import net.thedanpage.worldshardestgame.graph.Node;
 
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.io.InputStreamReader;
@@ -33,8 +30,12 @@ public class GameLevel {
 
 	public Graph identity;
 
+	public List<Point> goals = new ArrayList<>();
+
 	public Graph graph;
-	
+
+	public ArrayList<Edge> invalidEdges = new ArrayList<>();
+
 	/** The area of the level, not including background tiles. */
 	Area levelArea;
 	
@@ -131,10 +132,11 @@ public class GameLevel {
 		for (Node goal : goalNodes) {
 			if (goal.isGoal) {
 				graph.addNode(goal);
+				goals.add(goal.position);
 			}
 		}
 		this.graph = graph;
-		this.identity = graph.clone();
+		//this.identity = graph.clone();
 		System.out.println("Finished building graph");
 	}
 
@@ -166,14 +168,17 @@ public class GameLevel {
 			var x = (int)dot.getBounds().getX();
 			var y = (int)dot.getBounds().getY() + 22;
 			var dotSize = dot.getBounds().getWidth();
-			var playerSize = 28;
+			var playerSize = 40;
 
 			for (int xPos = x-(playerSize/2); xPos < x+(playerSize/2)+dotSize; xPos++) {
 				for(int yPos = y-(playerSize/2); yPos < y+(playerSize/2)+dotSize; yPos++) {
 					var node = this.graph.getNodeFromPosition(new Point(xPos, yPos));
 					if (node != null) {
-						node.invalidate();
-						//graph.removeNode(node);
+						var connectedEdges = node.connectedEdgesToNode();
+						for (Edge e : connectedEdges) {
+							e.invalidate();
+							invalidEdges.add(e);
+						}
 					}
 				}
 			}
@@ -199,19 +204,27 @@ public class GameLevel {
 
 	public void drawGraph(Graphics g) {
 		for (Node n : this.graph.nodes) {
-			if (n.invalid) {
-				g.setColor(Color.BLUE);
-				g.fillRect(n.position.x, n.position.y, 1, 1);
-			} else {
-				g.setColor(Color.RED);
-				g.fillRect(n.position.x, n.position.y, 1, 1);
+			for (Edge e : n.edges) {
+				for (Edge neighbour : e.to.edges) {
+					if(neighbour.invalid) {
+						g.setColor(Color.BLUE);
+						g.fillRect(n.position.x, n.position.y, 1, 1);
+					}
+				}
 			}
+			//g.setColor(Color.RED);
+			//g.fillRect(n.position.x, n.position.y, 1, 1);
 		}
 	}
 
 	public void updateGraph() {
-		this.graph = identity.clone();
+		resetGraph();
 		removeDotsFromGraph();
+	}
+
+	private void resetGraph() {
+		for(Edge edge : invalidEdges) edge.reset();
+		invalidEdges = new ArrayList<>();
 	}
 
 	public double getDistanceToNextCoin(Player player) {

@@ -17,14 +17,6 @@ public class Graph {
         this.nodeArray = new Node[1000][1000];
     }
 
-    public Graph clone() {
-        var clone = new Graph();
-        for (Node node : this.nodes) {
-            clone.addNode(new Node(new Point(node.position.x, node.position.y)));
-        }
-        return clone;
-    }
-
     public void addNode(Node node) {
         nodes.add(node);
         nodeArray[node.position.x][node.position.y] = node;

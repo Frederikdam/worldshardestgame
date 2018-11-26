@@ -3,11 +3,14 @@ package net.thedanpage.worldshardestgame.graph;
 public class Edge {
     public Node from;
     public Node to;
-    public double weight;
+    public boolean invalid = false;
 
-    public Edge(Node from, Node to, double weight) {
+    public Edge(Node from, Node to) {
         this.from = from;
         this.to = to;
-        this.weight = weight;
     }
+
+    public void reset() { invalid = false; }
+
+    public void invalidate() { invalid = true; }
 }

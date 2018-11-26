@@ -1,9 +1,6 @@
 package net.thedanpage.worldshardestgame;
 
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Rectangle;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Random;
@@ -68,6 +65,10 @@ public abstract class Player {
 		return null;
 	}
 
+	public Point getPosition() {
+		return new Point(x, y+22);
+	}
+
 	public Tile getTile(GameLevel level) {
 		for (Tile t : level.getTileMap()) {
 			if (this.x/40 == t.getSnapX() && this.y/40 == t.getSnapY()) {
@@ -83,7 +84,7 @@ public abstract class Player {
 	}
 
 	public Rectangle getBounds() {
-		return new Rectangle(this.x - 15, this.y - 15, 28, 28);
+		return new Rectangle(this.x - 14, this.y - 14, 28, 28);
 	}
 
 	public void respawn(GameLevel level) {
