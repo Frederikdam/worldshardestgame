@@ -173,7 +173,7 @@ public class GameLevel {
 					var node = graph.getNodeFromPosition(new Point(xPos, yPos));
 					if (node != null) {
 						node.invalidate();
-						graph.removeNode(node);
+						//graph.removeNode(node);
 					}
 				}
 			}
@@ -207,7 +207,7 @@ public class GameLevel {
 	public void updateGraph() {
 		this.graph = new Graph(identity);
 		removeDotsFromGraph();
-		System.out.println("Before: " + identity.nodes.size() + " After: " + graph.nodes.size());
+		//System.out.println("Before: " + identity.nodes.size() + " After: " + graph.nodes.size());
 	}
 
 	public double getDistanceToNextCoin(Player player) {

@@ -20,7 +20,8 @@ public class AStarGame extends Game<AStarPlayer> {
         this.level.buildGraph();
         this.level.removeDotsFromGraph();
         this.setup();
-        aStarSearch(new Point(200,200), new Point(300,300));
+
+        aStarSearch(new Point(population.get(0).x,population.get(0).y), new Point(410,300));
     }
 
     @Override
@@ -59,7 +60,6 @@ public class AStarGame extends Game<AStarPlayer> {
 
     public List<Point> aStarSearch(Point start, Point goal) {
 
-        //todo: fix
         Node startNode = level.graph.getNodeFromPosition(start);
         Node endNode = level.graph.getNodeFromPosition(goal);
 
@@ -85,8 +85,7 @@ public class AStarGame extends Game<AStarPlayer> {
 
                 // if last element in PQ reached
                 if (current.equals(endNode)) {
-                    //return reconstructPath(parentMap, startNode, endNode, 0);
-                    System.out.println("done");
+                    return pathTo(parentMap, endNode, startNode);
                 }
 
                 Set<Node> neighbors = current.getAdjacents();
@@ -146,5 +145,17 @@ public class AStarGame extends Game<AStarPlayer> {
                 return 0;
             };
         });
+    }
+
+    public List<Point> pathTo(HashMap<Node,Node> parentMap, Node endNode, Node startNode) {
+
+        Stack<Point> path = new Stack<>();
+        Node currentNode = endNode;
+
+        while(currentNode != startNode) {
+            currentNode = parentMap.get(currentNode);
+            path.push(currentNode.position);
+        }
+        return path;
     }
 }
