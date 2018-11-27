@@ -36,9 +36,6 @@ public class GameLevel {
 
 	public Graph graph;
 
-	ExecutorService executor = Executors.newWorkStealingPool();
-	Object lock = new Object();
-
 	public ArrayList<Edge> invalidEdges = new ArrayList<>();
 
 	/** The area of the level, not including background tiles. */
@@ -173,49 +170,47 @@ public class GameLevel {
 			var x = (int)dot.getBounds().getX();
 			var y = (int)dot.getBounds().getY() + 22;
 			var dotSize = dot.getBounds().getWidth();
-			var playerSize = 32;
+			var playerSize = 30;
 
-			executor.execute(() -> {
-				//top
-				for (int xPos = x-(playerSize/2); xPos < x+(playerSize/2)+dotSize; xPos++) {
-					var node = this.graph.getNodeFromPosition(new Point(xPos, y-(playerSize/2)));
-					if(node != null) if(node != null) invalidateNode(node);
-				}
-			});
+			//top
+			for (int xPos = x-(playerSize/2); xPos < x+(playerSize/2)+dotSize; xPos++) {
+				var node = this.graph.getNodeFromPosition(new Point(xPos, y-(playerSize/2)));
+				var node2 = this.graph.getNodeFromPosition(new Point(xPos, y-(playerSize/2)+1));
+				if(node != null) invalidateNode(node);
+				if(node2 != null) invalidateNode(node2);
+			}
 
-			executor.execute(() -> {
-				//bottom
-				for (int xPos = x-(playerSize/2); xPos < x+(playerSize/2)+dotSize; xPos++) {
-					var node = this.graph.getNodeFromPosition(new Point(xPos, (int)(y+dotSize+(playerSize/2))));
-					if(node != null) if(node != null) invalidateNode(node);
-				}
-			});
+			//bottom
+			for (int xPos = x-(playerSize/2); xPos < x+(playerSize/2)+dotSize; xPos++) {
+				var node = this.graph.getNodeFromPosition(new Point(xPos, (int)(y+dotSize+(playerSize/2))));
+				var node2 = this.graph.getNodeFromPosition(new Point(xPos, (int)(y+dotSize+(playerSize/2)-1)));
+				if(node != null) invalidateNode(node);
+				if(node2 != null) invalidateNode(node2);
+			}
 
-			executor.execute(() -> {
-				//right
-				for(int yPos = y-(playerSize/2); yPos < y+(playerSize/2)+dotSize; yPos++) {
-					var node = this.graph.getNodeFromPosition(new Point((int)(x+dotSize+(playerSize/2)), yPos));
-					if(node != null) if(node != null) invalidateNode(node);
-				}
-			});
+			//right
+			for(int yPos = y-(playerSize/2); yPos < y+(playerSize/2)+dotSize; yPos++) {
+				var node = this.graph.getNodeFromPosition(new Point((int)(x+dotSize+(playerSize/2)), yPos));
+				var node2 = this.graph.getNodeFromPosition(new Point((int)(x+dotSize+(playerSize/2)-1), yPos));
+				if(node != null) invalidateNode(node);
+				if(node2 != null) invalidateNode(node2);
+			}
 
-			executor.execute(() -> {
-				//left
-				for(int yPos = y-(playerSize/2); yPos < y+(playerSize/2)+dotSize; yPos++) {
-					var node = this.graph.getNodeFromPosition(new Point(x-(playerSize/2), yPos));
-					if(node != null) invalidateNode(node);
-				}
-			});
+			//left
+			for(int yPos = y-(playerSize/2); yPos < y+(playerSize/2)+dotSize; yPos++) {
+				var node = this.graph.getNodeFromPosition(new Point(x-(playerSize/2), yPos));
+				var node2 = this.graph.getNodeFromPosition(new Point(x-(playerSize/2)+1, yPos));
+				if(node != null) invalidateNode(node);
+				if(node2 != null) invalidateNode(node2);
+			}
 		}
 	}
 
 	private void invalidateNode(Node node) {
 		var connectedEdges = node.connectedEdgesToNode();
 		for (Edge e : connectedEdges) {
-			synchronized (lock) {
-				e.invalidate();
-				invalidEdges.add(e);
-			}
+			e.invalidate();
+			invalidEdges.add(e);
 		}
 	}
 

@@ -13,12 +13,17 @@ import java.util.List;
 
 public class AStarGame extends Game<AStarPlayer> {
 
-    GameLevel level;
+    ArrayList<Point> trimmedGoals = new ArrayList<>();
+
     public AStarGame(Controller controller, GameLevel level) {
         super(controller, level);
-        this.level = level;
-        this.level.buildGraph();
-        this.level.removeDotsFromGraph();
+        level.buildGraph();
+        level.removeDotsFromGraph();
+        getLevel().goals.forEach(goal -> {
+            if(goal.y % 20 == 0) {
+                trimmedGoals.add(goal);
+            }
+        });
         this.setup();
     }
 
@@ -57,24 +62,17 @@ public class AStarGame extends Game<AStarPlayer> {
     }
 
     public Stack<Node> aStarSearch(Point start, List<Point> goals) {
-
-        for(int i = 0; i < goals.size(); i++) {
-            if (goals.get(i).y % 20 != 0) {
-                goals.remove(goals.get(i));
-            }
-        }
-
         if(goals.size() == 0) return null;
 
         var goal = goals.get(0);
 
-        Node startNode = level.graph.getNodeFromPosition(start);
-        Node endNode = level.graph.getNodeFromPosition(goal);
+        Node startNode = getLevel().graph.getNodeFromPosition(start);
+        Node endNode = getLevel().graph.getNodeFromPosition(goal);
 
         // setup for A*
         HashMap<Node,Node> parentMap = new HashMap<Node,Node>();
         HashSet<Node> visited = new HashSet<Node>();
-        Map<Node, Double> distances = initializeAllToInfinity();
+        Map<Node, Double> distances = new HashMap<>();// initializeAllToInfinity();
 
         Queue<Node> priorityQueue = initQueue();
 
@@ -109,7 +107,8 @@ public class AStarGame extends Game<AStarPlayer> {
                         double totalDistance = current.getDistanceToStart() + neighborDistance + predictedDistance;
 
                         // check if distance is smaller
-                        if(totalDistance < distances.get(neighbor) ){
+                        double dist = distances.getOrDefault(neighbor, Double.MAX_VALUE);
+                        if(totalDistance < dist ){
                             // update n's distance
                             distances.put(neighbor, totalDistance);
                             // used for PriorityQueue
@@ -129,7 +128,7 @@ public class AStarGame extends Game<AStarPlayer> {
         return aStarSearch(start, goals);
     }
 
-    private Map<Node, Double> initializeAllToInfinity() {
+    /*private Map<Node, Double> initializeAllToInfinity() {
         Map<Node, Double> distances = new HashMap<>();
 
         Iterator<Node> iter = level.graph.nodes.iterator();
@@ -138,11 +137,7 @@ public class AStarGame extends Game<AStarPlayer> {
             distances.put(node, Double.POSITIVE_INFINITY);
         }
         return distances;
-    }
-
-    public void drawPath(Stack<Node> path) {
-
-    }
+    }*/
 
     private PriorityQueue<Node> initQueue() {
         return new PriorityQueue<>(10, new Comparator<Node>() {

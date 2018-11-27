@@ -13,8 +13,16 @@ public class AStarController extends Controller<AStarPlayer, AStarGame> {
 
     @Override
     public Move getMove(AStarGame game, AStarPlayer player) {
+        final long startTime = System.currentTimeMillis();
         game.getLevel().updateGraph();
-        var path = game.aStarSearch(player.getPosition(), game.getLevel().goals);
+        final long endTime = System.currentTimeMillis();
+        System.out.println("Total execution time UPDATE GRAPH: " + (endTime - startTime));
+
+        final long startTime2 = System.currentTimeMillis();
+        var path = game.aStarSearch(player.getPosition(), game.trimmedGoals);
+        final long endTime2 = System.currentTimeMillis();
+        System.out.println("Total execution time ASTAR: " + (endTime2 - startTime2));
+
         if (path == null) return Move.NEUTRAL;
         this.path = new ArrayList<>(path);
         var from = path.pop().position;
