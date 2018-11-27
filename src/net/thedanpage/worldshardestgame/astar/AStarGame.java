@@ -95,7 +95,6 @@ public class AStarGame extends Game<AStarPlayer> {
                     if (!visited.contains(neighbor) ){
 
                         // calculate predicted distance to the end node
-                        //todo: fix
                         double predictedDistance = Point.distance(neighbor.position.x, neighbor.position.y, endNode.position.x, endNode.position.y);
 
                         // 1. calculate distance to neighbor. 2. calculate dist from start node
@@ -132,6 +131,10 @@ public class AStarGame extends Game<AStarPlayer> {
             distances.put(node, Double.POSITIVE_INFINITY);
         }
         return distances;
+    }
+
+    public void drawPath(Stack<Node> path) {
+
     }
 
     private PriorityQueue<Node> initQueue() {

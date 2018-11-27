@@ -168,7 +168,7 @@ public class GameLevel {
 			var x = (int)dot.getBounds().getX();
 			var y = (int)dot.getBounds().getY() + 22;
 			var dotSize = dot.getBounds().getWidth();
-			var playerSize = 40;
+			var playerSize = 30;
 
 			for (int xPos = x-(playerSize/2); xPos < x+(playerSize/2)+dotSize; xPos++) {
 				for(int yPos = y-(playerSize/2); yPos < y+(playerSize/2)+dotSize; yPos++) {

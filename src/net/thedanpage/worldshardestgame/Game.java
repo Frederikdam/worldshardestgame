@@ -1,5 +1,7 @@
 package net.thedanpage.worldshardestgame;
 
+import net.thedanpage.worldshardestgame.astar.AStarController;
+
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -65,8 +67,9 @@ public abstract class Game<T extends Player> extends JPanel implements ActionLis
         g.setColor(Color.WHITE);
         g.setFont(new Font("Tahoma", Font.BOLD, 18));
         level.drawGraph(g);
+        if (controller instanceof AStarController) ((AStarController)controller).drawPath(g);
         g.setColor(Color.PINK);
-        g.fillRect(population.get(0).x, population.get(0).y+22, 1,1);
+        g.fillRect(population.get(0).x-2, population.get(0).y+21, 1,1);
         var count = generationCount();
         drawRightJustifiedString(count > 0 ? "Generation: " + count : "", 750, 17, g);
         g.dispose();
