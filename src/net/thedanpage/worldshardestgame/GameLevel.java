@@ -11,6 +11,10 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Timer;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class GameLevel {
 
@@ -28,11 +32,12 @@ public class GameLevel {
 	/** A list of all of the level's coins. **/
 	public ArrayList<Coin> coins;
 
-	public Graph identity;
-
 	public List<Point> goals = new ArrayList<>();
 
 	public Graph graph;
+
+	ExecutorService executor = Executors.newWorkStealingPool();
+	Object lock = new Object();
 
 	public ArrayList<Edge> invalidEdges = new ArrayList<>();
 
@@ -170,18 +175,45 @@ public class GameLevel {
 			var dotSize = dot.getBounds().getWidth();
 			var playerSize = 30;
 
-			for (int xPos = x-(playerSize/2); xPos < x+(playerSize/2)+dotSize; xPos++) {
-				for(int yPos = y-(playerSize/2); yPos < y+(playerSize/2)+dotSize; yPos++) {
-					var node = this.graph.getNodeFromPosition(new Point(xPos, yPos));
-					if (node != null) {
-						var connectedEdges = node.connectedEdgesToNode();
-						for (Edge e : connectedEdges) {
-							e.invalidate();
-							invalidEdges.add(e);
-						}
-					}
+			executor.execute(() -> {
+				//top
+				for (int xPos = x-(playerSize/2); xPos < x+(playerSize/2)+dotSize; xPos++) {
+					var node = this.graph.getNodeFromPosition(new Point(xPos, y-(playerSize/2)));
+					if(node != null) if(node != null) invalidateNode(node);
 				}
-			}
+			});
+
+			executor.execute(() -> {
+				//bottom
+				for (int xPos = x-(playerSize/2); xPos < x+(playerSize/2)+dotSize; xPos++) {
+					var node = this.graph.getNodeFromPosition(new Point(xPos, (int)(y+dotSize+(playerSize/2))));
+					if(node != null) if(node != null) invalidateNode(node);
+				}
+			});
+
+			executor.execute(() -> {
+				//right
+				for(int yPos = y-(playerSize/2); yPos < y+(playerSize/2)+dotSize; yPos++) {
+					var node = this.graph.getNodeFromPosition(new Point((int)(x+dotSize+(playerSize/2)), yPos));
+					if(node != null) if(node != null) invalidateNode(node);
+				}
+			});
+
+			executor.execute(() -> {
+				//left
+				for(int yPos = y-(playerSize/2); yPos < y+(playerSize/2)+dotSize; yPos++) {
+					var node = this.graph.getNodeFromPosition(new Point(x-(playerSize/2), yPos));
+					if(node != null) invalidateNode(node);
+				}
+			});
+		}
+	}
+
+	private void invalidateNode(Node node) {
+		var connectedEdges = node.connectedEdgesToNode();
+		for (Edge e : connectedEdges) {
+			e.invalidate();
+			synchronized (lock) { invalidEdges.add(e); }
 		}
 	}
 
