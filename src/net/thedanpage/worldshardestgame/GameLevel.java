@@ -173,7 +173,7 @@ public class GameLevel {
 			var x = (int)dot.getBounds().getX();
 			var y = (int)dot.getBounds().getY() + 22;
 			var dotSize = dot.getBounds().getWidth();
-			var playerSize = 30;
+			var playerSize = 32;
 
 			executor.execute(() -> {
 				//top

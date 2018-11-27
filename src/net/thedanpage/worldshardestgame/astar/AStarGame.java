@@ -58,6 +58,12 @@ public class AStarGame extends Game<AStarPlayer> {
 
     public Stack<Node> aStarSearch(Point start, List<Point> goals) {
 
+        for(int i = 0; i < goals.size(); i++) {
+            if (goals.get(i).y % 20 != 0) {
+                goals.remove(goals.get(i));
+            }
+        }
+
         if(goals.size() == 0) return null;
 
         var goal = goals.get(0);
@@ -118,7 +124,8 @@ public class AStarGame extends Game<AStarPlayer> {
                 }
             }
         }
-        goals.remove(0);
+        Point unreachableGoal = goals.remove(0);
+        goals.add(unreachableGoal);
         return aStarSearch(start, goals);
     }
 
