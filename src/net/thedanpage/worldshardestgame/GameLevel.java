@@ -212,8 +212,10 @@ public class GameLevel {
 	private void invalidateNode(Node node) {
 		var connectedEdges = node.connectedEdgesToNode();
 		for (Edge e : connectedEdges) {
-			e.invalidate();
-			synchronized (lock) { invalidEdges.add(e); }
+			synchronized (lock) {
+				e.invalidate();
+				invalidEdges.add(e);
+			}
 		}
 	}
 
