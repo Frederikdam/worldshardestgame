@@ -66,9 +66,10 @@ public abstract class Game<T extends Player> extends JPanel implements ActionLis
         g.fillRect(0, 0, 800, 22);
         g.setColor(Color.WHITE);
         g.setFont(new Font("Tahoma", Font.BOLD, 18));
-        level.drawGraph(g);
-        if (controller instanceof AStarController) ((AStarController)controller).drawPath(g);
-        g.setColor(Color.PINK);
+        if (controller instanceof AStarController) {
+            level.drawGraph(g);
+            ((AStarController)controller).drawPath(g);
+        }
         g.fillRect(population.get(0).x-2, population.get(0).y+21, 1,1);
         var count = generationCount();
         drawRightJustifiedString(count > 0 ? "Generation: " + count : "", 750, 17, g);

@@ -61,11 +61,7 @@ public class AStarGame extends Game<AStarPlayer> {
         }
     }
 
-    public Stack<Node> aStarSearch(Point start, List<Point> goals) {
-        if(goals.size() == 0) return null;
-
-        var goal = goals.get(0);
-
+    public Stack<Node> aStarSearch(Point start, Point goal) {
         Node startNode = getLevel().graph.getNodeFromPosition(start);
         Node endNode = getLevel().graph.getNodeFromPosition(goal);
 
@@ -123,9 +119,7 @@ public class AStarGame extends Game<AStarPlayer> {
                 }
             }
         }
-        Point unreachableGoal = goals.remove(0);
-        goals.add(unreachableGoal);
-        return aStarSearch(start, goals);
+        return null;
     }
 
     /*private Map<Node, Double> initializeAllToInfinity() {

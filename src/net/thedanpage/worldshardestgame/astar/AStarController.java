@@ -6,6 +6,7 @@ import net.thedanpage.worldshardestgame.graph.Node;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Stack;
 
 public class AStarController extends Controller<AStarPlayer, AStarGame> {
 
@@ -19,7 +20,11 @@ public class AStarController extends Controller<AStarPlayer, AStarGame> {
         System.out.println("Total execution time UPDATE GRAPH: " + (endTime - startTime));
 
         final long startTime2 = System.currentTimeMillis();
-        var path = game.aStarSearch(player.getPosition(), game.trimmedGoals);
+        Stack<Node> path = null;
+        for (Point point : game.trimmedGoals) {
+            path = game.aStarSearch(player.getPosition(), point);
+            if (path != null) break;
+        }
         final long endTime2 = System.currentTimeMillis();
         System.out.println("Total execution time ASTAR: " + (endTime2 - startTime2));
 
