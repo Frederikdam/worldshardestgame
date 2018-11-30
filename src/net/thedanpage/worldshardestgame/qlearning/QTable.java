@@ -16,6 +16,21 @@ public class QTable {
     String prevState;
     Move prevAction;
     String lastPosition = "";
+    int movesN = 0;
+    int moveRate = 0;
+    public int getMovesN() {
+        return movesN;
+    }
+    public void setMovesN(int movesN) {
+        this.movesN = movesN;
+    }
+    public int getMoveRate() {
+        return moveRate;
+    }
+    public void setMoveRate(int moveRate) {
+        this.moveRate = moveRate;
+    }
+
 
     public QTable(QLearningGameConfigs configs) {
         this.gameConfigs = configs;
@@ -88,8 +103,9 @@ public class QTable {
 
     String getGameString(QLearningGame game){
         var gameString = "";
-        gameString += getPlayerPosition(game);
-        gameString += getEnemyPositions(game);
+        gameString += getPlayerPosition(game) + ", " + getMoveRate();
+        //System.out.println(gameString);
+        //gameString += getEnemyPositions(game);
         return gameString;
     }
 

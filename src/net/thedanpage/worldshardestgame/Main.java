@@ -25,7 +25,7 @@ public class Main {
         var test = false;
         var replay = true;
 
-        var game = createGame(Algorithm.ASTAR);
+        var game = createGame(Algorithm.QLEARNING);
 
         if (sound) MusicPlayer.play(BACKGROUND);
 
@@ -78,7 +78,7 @@ public class Main {
     }
 
     private static Game createGame(Algorithm algorithm) {
-        var levelNumber = 1;
+        var levelNumber = 2;
         var level = createLevels().get(levelNumber-1);
 
         switch(algorithm) {
@@ -104,7 +104,7 @@ public class Main {
                 int actionRange = Move.values().length;
                 float explorationChance=0.2f;
                 float gammaValue=0.1f;
-                float learningRate=0.6f;
+                float learningRate=0.8f;
                 var qLearningGameConfigs = new QLearningGameConfigs(actionRange, explorationChance, gammaValue, learningRate);
                 var qTable = new QTable(qLearningGameConfigs);
                 var qLearningController = new QLearningController(qTable);
