@@ -21,7 +21,7 @@ import static net.thedanpage.worldshardestgame.Sound.BACKGROUND;
 public class Main {
 
     public static void main(String[] args) {
-        var sound = false;
+        var sound = true;
         var test = false;
         var replay = true;
 
@@ -78,7 +78,7 @@ public class Main {
     }
 
     private static Game createGame(Algorithm algorithm) {
-        var levelNumber = 2;
+        var levelNumber = 1;
         var level = createLevels().get(levelNumber-1);
 
         switch(algorithm) {

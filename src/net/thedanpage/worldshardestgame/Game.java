@@ -73,11 +73,11 @@ public abstract class Game<T extends Player> extends JPanel implements ActionLis
         }
         if (this instanceof AStarGame) {
             ((AStarGame)this).trimmedGoals.forEach(goal -> {
-                g.setColor(Color.red);
+                g.setColor(Color.black);
                 g.fillRect(goal.x, goal.y, 1, 1);
             });
         }
-        g.fillRect(population.get(0).x-2, population.get(0).y+21, 1,1);
+        g.fillRect(population.get(0).getPosition().x, population.get(0).getPosition().y, 1,1);
         var count = generationCount();
         drawRightJustifiedString(count > 0 ? "Generation: " + count : "", 750, 17, g);
         g.dispose();

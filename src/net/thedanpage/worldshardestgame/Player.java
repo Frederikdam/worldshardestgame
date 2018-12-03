@@ -50,9 +50,9 @@ public abstract class Player {
 
 	public void draw(Graphics g) {
 		g.setColor(new Color(0, 0, 0, (int) opacity));
-		g.fillRect(x - 15, y - 15 + 22, 28, 28);
+		g.fillRect(x - 14, y - 14 + 22, 28, 28);
 		g.setColor(new Color(255, 0, 0, (int) opacity));
-		g.fillRect(x-12, y-12 + 22,
+		g.fillRect(x-11, y-11 + 22,
 				   22, 22);
 	}
 
@@ -93,7 +93,7 @@ public abstract class Player {
 		this.deadByDot = false;
 		this.opacity = 255;
 		this.x = level.getSpawnPoint().x;
-		this.y = level.getSpawnPoint().y;
+		this.y = level.getSpawnPoint().y+22;
 		if (level.coins != null) {
 			for (Coin coin : level.coins) coin.collected = false;
 		}

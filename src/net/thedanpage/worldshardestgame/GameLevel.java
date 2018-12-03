@@ -28,7 +28,7 @@ public class GameLevel {
 
 	/** A list of all of the level's dots. */
 	public ArrayList<Dot> dots;
-	
+
 	/** A list of all of the level's coins. **/
 	public ArrayList<Coin> coins;
 
@@ -36,11 +36,13 @@ public class GameLevel {
 
 	public Graph graph;
 
+	final int playerSize = 28;
+
 	public ArrayList<Edge> invalidEdges = new ArrayList<>();
 
 	/** The area of the level, not including background tiles. */
 	Area levelArea;
-	
+
 	public GameLevel(int levelNumber) {
 		this.levelArea = new Area();
 		this.tileMap = new ArrayList<Tile>();
@@ -54,23 +56,28 @@ public class GameLevel {
 
 	public void reset() {
 		resetCoins();
-	    resetDots();
+		resetDots();
 	}
 
 	public void buildGraph() {
 		Graph graph = new Graph();
-		List<Node> goalNodes = new ArrayList<>();
 		System.out.println("Start building graph");
-		var playerSize = 32;
+
+		createNodes(graph);
+		var goalNodes = createGoalNodes();
+		trimNodes(graph);
+		removeWallNodes(new ArrayList<>(graph.nodes), graph);
+		addEdges(graph);
+		trimGoalNodes(goalNodes, graph);
+		addGoalsToGraph(goalNodes, graph);
+
+		this.graph = graph;
+		System.out.println("Finished building graph");
+	}
+
+	private List<Node> createGoalNodes() {
+		List<Node> goalNodes = new ArrayList<>();
 		for (Tile t : this.getTileMap()) {
-			if (t.getType() == 1 || t.getType() == 2) {
-				for (int x = t.getBounds().x; x < t.getBounds().x + t.getBounds().getWidth(); x++) {
-					for (int y = t.getBounds().y; y < t.getBounds().y + t.getBounds().getHeight(); y++) {
-						Node node = new Node(new Point(x, y+22));
-						graph.addNode(node);
-					}
-				}
-			}
 			if (t.getType() == 3) {
 				for (int x = t.getX(); x < t.getX() + t.getBounds().getWidth(); x++) {
 					for (int y = t.getY(); y < t.getY() + t.getBounds().getHeight(); y++) {
@@ -80,9 +87,58 @@ public class GameLevel {
 				}
 			}
 		}
+		return goalNodes;
+	}
+
+	private void createNodes(Graph graph) {
+		for (Tile t : this.getTileMap()) {
+			if (t.getType() == 1 || t.getType() == 2) {
+				for (int x = t.getBounds().x; x < t.getBounds().x + t.getBounds().getWidth(); x++) {
+					for (int y = t.getBounds().y; y < t.getBounds().y + t.getBounds().getHeight(); y++) {
+						Node node = new Node(new Point(x, y+22));
+						graph.addNode(node);
+					}
+				}
+			}
+		}
+	}
+
+	private void trimNodes(Graph graph) {
 		for (Node node : graph.nodes) {
 			var x = node.position.x;
 			var y = node.position.y;
+			if (graph.getNodeFromPosition(new Point(x+1, y-1)) == null && getAdjacentNodes(node, graph).size() == 7) {
+				//leftdown
+				for(int xPos = x; xPos > x-playerSize/2; xPos--) {
+					for(int yPos = y; yPos < y + playerSize / 2; yPos++) {
+						graph.getNodeFromPosition(new Point(xPos, yPos)).isWall = true;
+					}
+				}
+			}
+			if (graph.getNodeFromPosition(new Point(x-1, y-1)) == null && getAdjacentNodes(node, graph).size() == 7) {
+				//rightdown
+				for(int xPos = x; xPos < x+playerSize/2; xPos++) {
+					for(int yPos = y; yPos < y+playerSize/2; yPos++) {
+						graph.getNodeFromPosition(new Point(xPos, yPos)).isWall = true;
+					}
+				}
+			}
+			if (graph.getNodeFromPosition(new Point(x+1, y+1)) == null && getAdjacentNodes(node, graph).size() == 7) {
+				//leftup
+				for(int xPos = x; xPos > x-playerSize/2; xPos--) {
+					for(int yPos = y; yPos > y-playerSize/2; yPos--) {
+						graph.getNodeFromPosition(new Point(xPos, yPos)).isWall = true;
+					}
+				}
+			}
+			if (graph.getNodeFromPosition(new Point(x-1, y+1)) == null && getAdjacentNodes(node, graph).size() == 7) {
+				//rightup
+				for(int xPos = x; xPos < x+playerSize/2; xPos++) {
+					for(int yPos = y; yPos > y-playerSize/2; yPos--) {
+						graph.getNodeFromPosition(new Point(xPos, yPos)).isWall = true;
+					}
+				}
+			}
 			if(graph.getNodeFromPosition(new Point(x,y-1)) == null) {
 				//top
 				graph.markNodesAsWallUpDown(node.position, new Point(x, y + (playerSize / 2)));
@@ -100,13 +156,31 @@ public class GameLevel {
 				graph.markNodesAsWallRightLeft(node.position, new Point(x - (playerSize / 2), y));
 			}
 		}
-		for(Node node : new ArrayList<>(graph.nodes)) if (node.isWall) graph.removeNode(node);
+	}
+
+	private void addEdges(Graph graph) {
 		for (Node node : graph.nodes) {
 			List<Node> adjacentNodes = getAdjacentNodes(node, graph);
 			for (Node adjacent : adjacentNodes) {
 				node.addEdge(adjacent);
 			}
 		}
+	}
+
+	private void addGoalsToGraph(List<Node> goalNodes, Graph graph) {
+		for (Node goal : goalNodes) {
+			if (goal.isGoal) {
+				graph.addNode(goal);
+				goals.add(goal.position);
+			}
+		}
+	}
+
+	private void removeWallNodes(List<Node> nodes, Graph graph) {
+		for(Node node : nodes) if (node.isWall) graph.removeNode(node);
+	}
+
+	private void trimGoalNodes(List<Node> goalNodes, Graph graph) {
 		for (Node goal : goalNodes) {
 			if(graph.getNodeFromPosition(new Point(goal.position.x - (playerSize / 2) - 1, goal.position.y)) != null) {
 				//goal is right side
@@ -131,15 +205,6 @@ public class GameLevel {
 				goal.isGoal = true;
 			}
 		}
-		for (Node goal : goalNodes) {
-			if (goal.isGoal) {
-				graph.addNode(goal);
-				goals.add(goal.position);
-			}
-		}
-		this.graph = graph;
-		//this.identity = graph.clone();
-		System.out.println("Finished building graph");
 	}
 
 	private List<Node> getAdjacentNodes(Node node, Graph graph) {
@@ -170,38 +235,41 @@ public class GameLevel {
 			var x = (int)dot.getBounds().getX();
 			var y = (int)dot.getBounds().getY() + 22;
 			var dotSize = dot.getBounds().getWidth();
-			var playerSize = 32;
+			var extraSpace = 4;
+			var offset = extraSpace + playerSize/2;
+			var depth = 2;
+			var stride = 1;
 
 			//top
-			for (int xPos = x-(playerSize/2); xPos < x+(playerSize/2)+dotSize; xPos++) {
-				var node = this.graph.getNodeFromPosition(new Point(xPos, y-(playerSize/2)));
-				var node2 = this.graph.getNodeFromPosition(new Point(xPos, y-(playerSize/2)+1));
-				if(node != null) invalidateNode(node);
-				if(node2 != null) invalidateNode(node2);
+			for (int xPos = x-offset; xPos < x+offset+dotSize; xPos++) {
+				for(int i = 0; i < depth+stride; i+=stride) {
+					var node = graph.getNodeFromPosition(new Point(xPos, y-offset+i));
+					if(node != null) invalidateNode(node);
+				}
 			}
 
 			//bottom
-			for (int xPos = x-(playerSize/2); xPos < x+(playerSize/2)+dotSize; xPos++) {
-				var node = this.graph.getNodeFromPosition(new Point(xPos, (int)(y+dotSize+(playerSize/2))));
-				var node2 = this.graph.getNodeFromPosition(new Point(xPos, (int)(y+dotSize+(playerSize/2)-1)));
-				if(node != null) invalidateNode(node);
-				if(node2 != null) invalidateNode(node2);
+			for (int xPos = x-offset; xPos < x+offset+dotSize; xPos++) {
+				for(int i = 0; i < depth+stride; i+=stride) {
+					var node = graph.getNodeFromPosition(new Point(xPos, (int)(y+dotSize+offset-i)));
+					if(node != null) invalidateNode(node);
+				}
 			}
 
 			//right
-			for(int yPos = y-(playerSize/2); yPos < y+(playerSize/2)+dotSize; yPos++) {
-				var node = this.graph.getNodeFromPosition(new Point((int)(x+dotSize+(playerSize/2)), yPos));
-				var node2 = this.graph.getNodeFromPosition(new Point((int)(x+dotSize+(playerSize/2)-1), yPos));
-				if(node != null) invalidateNode(node);
-				if(node2 != null) invalidateNode(node2);
+			for(int yPos = y-offset; yPos < y+offset+dotSize; yPos++) {
+				for(int i = 0; i < depth+stride; i+=stride) {
+					var node = graph.getNodeFromPosition(new Point((int)(x+dotSize+offset-i), yPos));
+					if(node != null) invalidateNode(node);
+				}
 			}
 
 			//left
-			for(int yPos = y-(playerSize/2); yPos < y+(playerSize/2)+dotSize; yPos++) {
-				var node = this.graph.getNodeFromPosition(new Point(x-(playerSize/2), yPos));
-				var node2 = this.graph.getNodeFromPosition(new Point(x-(playerSize/2)+1, yPos));
-				if(node != null) invalidateNode(node);
-				if(node2 != null) invalidateNode(node2);
+			for(int yPos = y-offset; yPos < y+offset+dotSize; yPos++) {
+				for(int i = 0; i < depth+stride; i+=stride) {
+					var node = graph.getNodeFromPosition(new Point((int)(x-offset+i), yPos));
+					if(node != null) invalidateNode(node);
+				}
 			}
 		}
 	}
@@ -251,7 +319,7 @@ public class GameLevel {
 		removeDotsFromGraph();
 	}
 
-	private void resetGraph() {
+	public void resetGraph() {
 		for(Edge edge : invalidEdges) edge.reset();
 		invalidEdges = new ArrayList<>();
 	}
@@ -270,7 +338,7 @@ public class GameLevel {
 		}
 		return Double.MAX_VALUE;
 	}
-	
+
 	/**
 	 * @return spawnPoint
 	 */
@@ -283,9 +351,9 @@ public class GameLevel {
 	}
 
 	public void drawTiles(Graphics g) {
-		
+
 		Graphics2D g2 = (Graphics2D) g;
-		
+
 		try {
 			/*for (Tile t : this.tileMap) {
 				//Background
@@ -294,18 +362,18 @@ public class GameLevel {
 					g.fillRect(t.getX(), t.getY(), 40, 40);
 				}
 			}*/
-			
+
 			g.setColor(new Color(180, 181, 254));
 			g.fillRect(0, 22, 800, 622);
-			
+
 			//Border around level
 			g2.setColor(Color.BLACK);
 			g2.fill(this.levelArea);
-			
+
 			for (Tile t : this.tileMap) {
-				
+
 				t.draw(this, g);
-				
+
 			}
 		} catch (Exception e) {
 			System.out.println("File not found.");
@@ -340,15 +408,15 @@ public class GameLevel {
 				String line = lines[i];
 				String[] dotData = line.replaceAll(" ", "").split("-");
 				this.dots.add(new Dot(
-					Integer.parseInt(dotData[0]),
-					Integer.parseInt(dotData[1]),
-					new Point(Integer.parseInt(dotData[2].split(",")[0]),
-							Integer.parseInt(dotData[2].split(",")[1])),
-					new Point(Integer.parseInt(dotData[3].split(",")[0]),
-							Integer.parseInt(dotData[3].split(",")[1])),
-					Double.parseDouble(dotData[4]),
-					Boolean.parseBoolean(dotData[5]),
-					Boolean.parseBoolean(dotData[6])
+						Integer.parseInt(dotData[0]),
+						Integer.parseInt(dotData[1]),
+						new Point(Integer.parseInt(dotData[2].split(",")[0]),
+								Integer.parseInt(dotData[2].split(",")[1])),
+						new Point(Integer.parseInt(dotData[3].split(",")[0]),
+								Integer.parseInt(dotData[3].split(",")[1])),
+						Double.parseDouble(dotData[4]),
+						Boolean.parseBoolean(dotData[5]),
+						Boolean.parseBoolean(dotData[6])
 				));
 			}
 		} catch(Exception e){}
@@ -393,7 +461,7 @@ public class GameLevel {
 				+ ", dots=" + dots + ", coins=" + coins + ", levelArea="
 				+ levelArea + "]";
 	}
-	
+
 	/**
 	 * Load the current level data from
 	 * net.thedanpage.worldshardestgame.resources.maps
@@ -402,14 +470,14 @@ public class GameLevel {
 
 		try {
 			this.spawnPoint = new Point(
-							Integer.parseInt(PropLoader
-									.loadProperty("spawn_point",
-											"net/thedanpage/worldshardestgame/resources/maps/level_" + levelNum + ".properties")
-									.split(",")[0]) * 40 + 20,
-							Integer.parseInt(PropLoader
-									.loadProperty("spawn_point",
-											"net/thedanpage/worldshardestgame/resources/maps/level_" + levelNum + ".properties")
-									.split(",")[1]) * 40 + 20);
+					Integer.parseInt(PropLoader
+							.loadProperty("spawn_point",
+									"net/thedanpage/worldshardestgame/resources/maps/level_" + levelNum + ".properties")
+							.split(",")[0]) * 40 + 20,
+					Integer.parseInt(PropLoader
+							.loadProperty("spawn_point",
+									"net/thedanpage/worldshardestgame/resources/maps/level_" + levelNum + ".properties")
+							.split(",")[1]) * 40 + 20);
 
 			resetCoins();
 

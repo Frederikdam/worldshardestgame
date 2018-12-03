@@ -14,24 +14,66 @@ import java.util.concurrent.Executors;
 public class AStarController extends Controller<AStarPlayer, AStarGame> {
 
     ArrayList<Node> path = new ArrayList<>();
-    ArrayList<Stack<Node>> paths = new ArrayList<>();
     ExecutorService executor = Executors.newWorkStealingPool();
+
+    boolean winningPathFound = false;
+    Stack<Node> winningPath;
+    Move lastWinningMove;
+
 
     @Override
     public Move getMove(AStarGame game, AStarPlayer player) {
-        game.trimmedGoals.forEach(goal -> {
-            var p = game.aStarSearch(player.getPosition(), goal);
-            if (p != null) paths.add(p);
-        });
+
+        var playerPos = player.getPosition();
+
+        if(winningPathFound) {
+            if (winningPath.isEmpty()) {
+                winningPathFound = false;
+                return lastWinningMove;
+            }
+            var nextMove = pointToMove(playerPos, winningPath.pop().position);
+            lastWinningMove = nextMove;
+            return nextMove;
+        }
+
+        final long startTime = System.currentTimeMillis();
+        game.getLevel().updateGraph();
+        ArrayList<Stack<Node>> paths = new ArrayList<>();
+
+        if(game.getLevel().allCoinsCollected()) {
+            game.trimmedGoals.forEach(goal -> {
+                var p = game.aStarSearch(playerPos, goal);
+                if (p != null) paths.add(p);
+            });
+        } else {
+            game.getLevel().coins.forEach(coin -> {
+                var p = game.aStarSearch(playerPos, new Point((int)coin.getBounds().getCenterX(), (int)coin.getBounds().getCenterY()+22));
+                if (p != null) paths.add(p);
+            });
+        }
+
+        if(paths.isEmpty()) return nextFleeMove(game, player.clone());
 
         int[] nMoves = new int[paths.size()];
-        for(int i = 0; i<paths.size(); i++) {
+        outer:for(int i = 0; i<paths.size(); i++) {
             var pathClone = (Stack<Node>)paths.get(i).clone();
-            var sim = new Simulation(game, player, pathClone);
+            var playerClone = player.clone();
+            var sim = new Simulation(game, playerClone, pathClone);
             while (sim.playerIsAlive) {
                 nMoves[i]++;
-                sim.simulate();
+                sim.simulateWithNodes();
+                if(sim.path.isEmpty()) {
+                    game.getLevel().resetGraph();
+                    winningPathFound = true;
+                    winningPath = sim.pathCopy;
+                    path = new ArrayList<>(winningPath);
+                    break outer;
+                }
             }
+        }
+
+        if(winningPathFound) {
+            return didFindWinningPath();
         }
 
         int bestValue = -1;
@@ -44,12 +86,48 @@ public class AStarController extends Controller<AStarPlayer, AStarGame> {
         }
 
         Stack<Node> bestPath = paths.get(bestPathIndex);
+        if(bestPath.isEmpty()) return Move.NEUTRAL;
         this.path = new ArrayList<>(bestPath);
         var from = bestPath.pop().position;
         var to = bestPath.pop().position;
         var move = pointToMove(from, to);
 
+        final long endTime = System.currentTimeMillis();
+        System.out.println("getMove: " + (endTime - startTime));
+
         return move;
+    }
+
+    private Move didFindWinningPath() {
+        var from = winningPath.pop().position;
+        var to = winningPath.pop().position;
+        var move = pointToMove(from, to);
+        return move;
+    }
+
+    private Move nextFleeMove(AStarGame game, AStarPlayer player) {
+        int[] numberOfMoves = new int[Move.values().length];
+        for (int i = 0; i < Move.values().length; i++) {
+            var simDepth = 10;
+            var stack = new Stack<Move>();
+            var move = Move.values()[i];
+            for (int j = 0; j < simDepth; j++) stack.push(move);
+            var sim = new Simulation(game, stack, player);
+            while(sim.playerIsAlive) {
+                numberOfMoves[i]++;
+                sim.simulateWithMoves();
+            }
+        }
+        int bValue = -1;
+        int bPathIndex = 0;
+        for (int i = 0; i<numberOfMoves.length; i++) {
+            if (numberOfMoves[i] > bValue) {
+                bValue = numberOfMoves[i];
+                bPathIndex = i;
+            }
+        }
+        var nextMove = Move.values()[bPathIndex];
+        return nextMove;
     }
 
     /*@Override
