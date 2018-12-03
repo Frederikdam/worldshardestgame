@@ -13,14 +13,13 @@ import java.util.List;
 
 public class AStarGame extends Game<AStarPlayer> {
 
-    ArrayList<Point> trimmedGoals = new ArrayList<>();
+    public ArrayList<Point> trimmedGoals = new ArrayList<>();
 
     public AStarGame(Controller controller, GameLevel level) {
         super(controller, level);
         level.buildGraph();
-        level.removeDotsFromGraph();
         getLevel().goals.forEach(goal -> {
-            if(goal.y % 20 == 0) {
+            if(goal.y % 40 == 0) {
                 trimmedGoals.add(goal);
             }
         });

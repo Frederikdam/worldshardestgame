@@ -139,7 +139,7 @@ public abstract class Player {
 		return false;
 	}
 
-	boolean collidesWith(Shape other) {
+	public boolean collidesWith(Shape other) {
 		return this.getBounds().getBounds2D().intersects(other.getBounds2D());
 	}
 

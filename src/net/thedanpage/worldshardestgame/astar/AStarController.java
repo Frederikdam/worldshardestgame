@@ -7,12 +7,52 @@ import net.thedanpage.worldshardestgame.graph.Node;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Stack;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class AStarController extends Controller<AStarPlayer, AStarGame> {
 
     ArrayList<Node> path = new ArrayList<>();
+    ArrayList<Stack<Node>> paths = new ArrayList<>();
+    ExecutorService executor = Executors.newWorkStealingPool();
 
     @Override
+    public Move getMove(AStarGame game, AStarPlayer player) {
+        game.trimmedGoals.forEach(goal -> {
+            var p = game.aStarSearch(player.getPosition(), goal);
+            if (p != null) paths.add(p);
+        });
+
+        int[] nMoves = new int[paths.size()];
+        for(int i = 0; i<paths.size(); i++) {
+            var pathClone = (Stack<Node>)paths.get(i).clone();
+            var sim = new Simulation(game, player, pathClone);
+            while (sim.playerIsAlive) {
+                nMoves[i]++;
+                sim.simulate();
+            }
+        }
+
+        int bestValue = -1;
+        int bestPathIndex = 0;
+        for (int i = 0; i<nMoves.length; i++) {
+            if (nMoves[i] > bestValue) {
+                bestValue = nMoves[i];
+                bestPathIndex = i;
+            }
+        }
+
+        Stack<Node> bestPath = paths.get(bestPathIndex);
+        this.path = new ArrayList<>(bestPath);
+        var from = bestPath.pop().position;
+        var to = bestPath.pop().position;
+        var move = pointToMove(from, to);
+
+        return move;
+    }
+
+    /*@Override
     public Move getMove(AStarGame game, AStarPlayer player) {
         final long startTime = System.currentTimeMillis();
         game.getLevel().updateGraph();
@@ -34,7 +74,7 @@ public class AStarController extends Controller<AStarPlayer, AStarGame> {
         var to = path.pop().position;
         var move = pointToMove(from, to);
         return move;
-    }
+    }*/
 
     private Move pointToMove(Point from, Point to) {
         if(from.x == to.x && from.y+1 == to.y) return Move.DOWN;

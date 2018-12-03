@@ -58,6 +58,10 @@ public class Dot {
 		this.moveToPos1 = moveToPos1;
 		this.vertMovement = vertMovement;
 	}
+
+	public Dot clone() {
+		return new Dot((int)x/40, (int)y/40, new Point(pos1.x, pos1.y), new Point(pos2.x, pos2.y), speed, moveToPos1, vertMovement);
+	}
 	
 	
 	public void draw(Graphics g) {

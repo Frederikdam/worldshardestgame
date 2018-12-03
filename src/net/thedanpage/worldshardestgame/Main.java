@@ -25,7 +25,7 @@ public class Main {
         var test = false;
         var replay = true;
 
-        var game = createGame(Algorithm.QLEARNING);
+        var game = createGame(Algorithm.ASTAR);
 
         if (sound) MusicPlayer.play(BACKGROUND);
 

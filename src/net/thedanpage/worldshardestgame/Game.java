@@ -1,6 +1,7 @@
 package net.thedanpage.worldshardestgame;
 
 import net.thedanpage.worldshardestgame.astar.AStarController;
+import net.thedanpage.worldshardestgame.astar.AStarGame;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -69,6 +70,12 @@ public abstract class Game<T extends Player> extends JPanel implements ActionLis
         if (controller instanceof AStarController) {
             level.drawGraph(g);
             ((AStarController)controller).drawPath(g);
+        }
+        if (this instanceof AStarGame) {
+            ((AStarGame)this).trimmedGoals.forEach(goal -> {
+                g.setColor(Color.red);
+                g.fillRect(goal.x, goal.y, 1, 1);
+            });
         }
         g.fillRect(population.get(0).x-2, population.get(0).y+21, 1,1);
         var count = generationCount();
