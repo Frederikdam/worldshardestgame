@@ -100,40 +100,40 @@ public abstract class Player {
 	}
 
 	boolean checkCollisionUp(GameLevel level) {
-		if (getRelativeTile(level, this.x - 14, this.y + 24, 0, -1) != null &&
-				getRelativeTile(level, this.x - 14, this.y + 24, 0, -1).getType() == 0 ||
-				getRelativeTile(level, this.x + 15, this.y + 24, 0, -1) != null &&
-						getRelativeTile(level, this.x + 15, this.y + 24, 0, -1).getType() == 0) {
+		if (getRelativeTile(level, this.x - 14, this.y + 25, 0, -1) != null &&
+				getRelativeTile(level, this.x - 14, this.y + 25, 0, -1).getType() == 0 ||
+				getRelativeTile(level, this.x + 14, this.y + 25, 0, -1) != null &&
+						getRelativeTile(level, this.x + 14, this.y + 25, 0, -1).getType() == 0) {
 			return true;
 		}
 		return false;
 	}
 
 	boolean checkCollisionDown(GameLevel level) {
-		if (getRelativeTile(level, this.x - 14, this.y - 27, 0, 1) != null &&
-				getRelativeTile(level, this.x - 14, this.y - 27, 0, 1).getType() == 0 ||
-				getRelativeTile(level, this.x + 15, this.y - 27, 0, 1) != null &&
-						getRelativeTile(level, this.x + 15, this.y - 27, 0, 1).getType() == 0) {
+		if (getRelativeTile(level, this.x - 14, this.y - 28, 0, 1) != null &&
+				getRelativeTile(level, this.x - 14, this.y - 28, 0, 1).getType() == 0 ||
+				getRelativeTile(level, this.x + 14, this.y - 28, 0, 1) != null &&
+						getRelativeTile(level, this.x + 14, this.y - 28, 0, 1).getType() == 0) {
 			return true;
 		}
 		return false;
 	}
 
 	boolean checkCollisionLeft(GameLevel level) {
-		if (getRelativeTile(level, this.x + 24, this.y - 15, -1, 0) != null &&
-				getRelativeTile(level, this.x + 24, this.y - 15, -1, 0).getType() == 0 ||
-				getRelativeTile(level, this.x + 24, this.y + 14, -1, 0) != null &&
-						getRelativeTile(level, this.x + 24, this.y + 14, -1, 0).getType() == 0) {
+		if (getRelativeTile(level, this.x + 25, this.y - 14, -1, 0) != null &&
+				getRelativeTile(level, this.x + 25, this.y - 14, -1, 0).getType() == 0 ||
+				getRelativeTile(level, this.x + 25, this.y + 14, -1, 0) != null &&
+						getRelativeTile(level, this.x + 25, this.y + 14, -1, 0).getType() == 0) {
 			return true;
 		}
 		return false;
 	}
 
 	boolean checkCollisionRight(GameLevel level) {
-		if (getRelativeTile(level, this.x - 27, this.y - 15, 1, 0) != null &&
-				getRelativeTile(level, this.x - 27, this.y - 15, 1, 0).getType() == 0 ||
-				getRelativeTile(level, this.x - 27, this.y + 15, 1, 0) != null &&
-						getRelativeTile(level, this.x - 27, this.y + 15, 1, 0).getType() == 0) {
+		if (getRelativeTile(level, this.x - 28, this.y - 14, 1, 0) != null &&
+				getRelativeTile(level, this.x - 28, this.y - 14, 1, 0).getType() == 0 ||
+				getRelativeTile(level, this.x - 28, this.y + 14, 1, 0) != null &&
+						getRelativeTile(level, this.x - 28, this.y + 14, 1, 0).getType() == 0) {
 			return true;
 		}
 		return false;
