@@ -18,7 +18,8 @@ public class QLearningController extends Controller<QLearningPlayer, QLearningGa
     }
 
     @Override
-    public void didMove(QLearningGame game, QLearningPlayer player) {
+    public void didMove(QLearningGame game, QLearningPlayer player, Move move) {
+        super.didMove(game, player, move);
 
         double fitness;
         if (game.getLevel().allCoinsCollected()) {

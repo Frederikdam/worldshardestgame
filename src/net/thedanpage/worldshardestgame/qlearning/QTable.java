@@ -103,7 +103,7 @@ public class QTable {
 
     String getGameString(QLearningGame game){
         var gameString = "";
-        gameString += getPlayerPosition(game) + ", " + getMoveRate();
+        gameString += getPlayerPosition(game);// + ", " + getMoveRate();
         //System.out.println(gameString);
         //gameString += getEnemyPositions(game);
         return gameString;

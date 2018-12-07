@@ -97,7 +97,7 @@ public abstract class Game<T extends Player> extends JPanel implements ActionLis
         for(T player : population) {
             var nextMove = controller.getMove(this, player);
             advancePlayer(nextMove, getLevel(), player);
-            controller.didMove(this, player);
+            controller.didMove(this, player, nextMove);
             if(player.isDead()) {
                 deadPlayerCount++;
             }
@@ -163,5 +163,13 @@ public abstract class Game<T extends Player> extends JPanel implements ActionLis
         FontMetrics fm = g.getFontMetrics();
         int x = (w - fm.stringWidth(s));
         g.drawString(s, x, h);
+    }
+
+    public void restartLevel() {
+        getLevel().reset();
+
+        for(Player player : this.population) {
+            player.respawn(getLevel());
+        }
     }
 }

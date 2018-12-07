@@ -56,5 +56,7 @@ public class QLearningGame extends Game<QLearningPlayer> {
 
     @Override
     public void playerWon(QLearningPlayer player) {
+        restartLevel();
+        System.out.println("We won!");
     }
 }

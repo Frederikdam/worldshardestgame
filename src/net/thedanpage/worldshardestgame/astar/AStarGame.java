@@ -52,14 +52,6 @@ public class AStarGame extends Game<AStarPlayer> {
         return -1;
     }
 
-    private void restartLevel() {
-        getLevel().reset();
-
-        for(AStarPlayer player : this.population) {
-            player.respawn(getLevel());
-        }
-    }
-
     public Stack<Node> aStarSearch(Point start, Point goal) {
         Node startNode = getLevel().graph.getNodeFromPosition(start);
         Node endNode = getLevel().graph.getNodeFromPosition(goal);

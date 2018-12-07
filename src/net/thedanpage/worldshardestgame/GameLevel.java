@@ -237,7 +237,7 @@ public class GameLevel {
 			var dotSize = dot.getBounds().getWidth();
 			var extraSpace = 4;
 			var offset = extraSpace + playerSize/2;
-			var depth = 2;
+			var depth = 1;
 			var stride = 1;
 
 			//top
