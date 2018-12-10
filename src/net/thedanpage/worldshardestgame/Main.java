@@ -27,7 +27,7 @@ public class Main {
         var test = true;
         var replay = true;
 
-        var game = createGame(Algorithm.ASTAR);
+        var game = createGame(Algorithm.GENETIC);
 
         if (sound) MusicPlayer.play(BACKGROUND);
 
@@ -102,7 +102,7 @@ public class Main {
             case GENETIC:
                 var populationSize = 100;
                 var initialMoveCount = 5;
-                var mutationRate = 0.005;
+                var mutationRate = 0.01;
                 Function<Integer, Integer> mutationChange = value -> {
                     var newValue = value < 5000 ? value + 4 : value;
                     return newValue;

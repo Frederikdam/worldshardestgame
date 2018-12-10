@@ -96,14 +96,14 @@ public class QTable {
         if (lastPosition.equals(getPlayerPosition(game)) && prevAction != Move.NEUTRAL) {
             qValues[prevAction.ordinal()] = -1;
         } else {
-            qValues[prevAction.ordinal()] = gameConfigs.learningRate * (reward + (gameConfigs.gammaValue * actionQ) - prevActionQ);
+            qValues[prevAction.ordinal()] = prevActionQ + gameConfigs.learningRate * (reward + (gameConfigs.gammaValue * actionQ) - prevActionQ);
         }
         table.put(prevState, qValues);
     }
 
     String getGameString(QLearningGame game){
         var gameString = "";
-        gameString += getPlayerPosition(game);// + ", " + getMoveRate();
+        gameString += getPlayerPosition(game); // + ", " + getMoveRate();
         //System.out.println(gameString);
         //gameString += getEnemyPositions(game);
         return gameString;
