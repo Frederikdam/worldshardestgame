@@ -100,7 +100,7 @@ public class Main {
 
         switch(algorithm) {
             case GENETIC:
-                var populationSize = 100;
+                var populationSize = 200;
                 var initialMoveCount = 5;
                 var mutationRate = 0.005;
                 Function<Integer, Integer> mutationChange = value -> {

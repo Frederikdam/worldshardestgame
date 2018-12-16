@@ -9,6 +9,7 @@ public class ReplayController extends Controller<ReplayPlayer, ReplayGame> {
 
     @Override
     public Move getMove(ReplayGame game, ReplayPlayer player) {
+        System.out.println("moves: " + game.controller.moves.size());
         if (moves.isEmpty()) return Move.NEUTRAL;
         return moves.remove();
     }
