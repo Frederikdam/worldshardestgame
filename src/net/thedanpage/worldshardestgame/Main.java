@@ -102,9 +102,9 @@ public class Main {
             case GENETIC:
                 var populationSize = 100;
                 var initialMoveCount = 5;
-                var mutationRate = 0.01;
+                var mutationRate = 0.005;
                 Function<Integer, Integer> mutationChange = value -> {
-                    var newValue = value < 5000 ? value + 4 : value;
+                    var newValue = value < 2000 ? value + 1 : value;
                     return newValue;
                 };
 
