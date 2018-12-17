@@ -53,7 +53,8 @@ public class GeneticGame extends Game<GeneticPlayer> {
     @Override
     public void playerWon(GeneticPlayer player) {
         getLevel().reset();
-        System.out.println("moves: " + player.getMoves().size());
+        System.out.println("moves: " + player.nextMoveIndex);
+
         for(GeneticPlayer p : population) {
             p.setDead(true);
         }
