@@ -26,7 +26,7 @@ public class AStarController extends Controller<AStarPlayer, AStarGame> {
 
         var playerPos = player.getPosition();
 
-        if(winningPathFound) {
+        if(winningPathFound && game.getLevel().allCoinsCollected()) {
             if (winningPath.isEmpty()) {
                 winningPathFound = false;
                 return lastWinningMove;
@@ -62,7 +62,7 @@ public class AStarController extends Controller<AStarPlayer, AStarGame> {
             while (sim.playerIsAlive) {
                 nMoves[i]++;
                 sim.simulateWithNodes();
-                if(sim.path.isEmpty()) {
+                if(sim.path.isEmpty() && game.getLevel().allCoinsCollected() && !playerClone.isDead()) {
                     game.getLevel().resetGraph();
                     winningPathFound = true;
                     winningPath = sim.pathCopy;

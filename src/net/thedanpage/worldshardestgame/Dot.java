@@ -95,7 +95,7 @@ public class Dot {
 	}
 	
 	public Ellipse2D getBounds() {
-		return new Ellipse2D.Double((this.x - 10) + 20 , (this.y - 10) + 20, 20, 20);
+		return new Ellipse2D.Double((this.x - 10) + 20 , (this.y - 10) + 20, 21, 21);
 	}
 	
 }

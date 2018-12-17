@@ -24,10 +24,10 @@ public class Main {
 
     public static void main(String[] args) {
         var sound = false;
-        var test = true;
+        var test = false;
         var replay = true;
 
-        var game = createGame(Algorithm.GENETIC);
+        var game = createGame(Algorithm.ASTAR);
 
         if (sound) MusicPlayer.play(BACKGROUND);
 
@@ -95,7 +95,7 @@ public class Main {
     }
 
     private static Game createGame(Algorithm algorithm) {
-        var levelNumber = 2;
+        var levelNumber = 12;
         var level = createLevels().get(levelNumber-1);
 
         switch(algorithm) {

@@ -42,11 +42,13 @@ public class Simulation {
     }
 
     public void simulateWithNodes() {
+        checkIfDead();
         advanceGameWithNodes();
         checkIfDead();
     }
 
     public void simulateWithMoves() {
+        checkIfDead();
         advanceGameWithMoves();
         checkIfDead();
     }
