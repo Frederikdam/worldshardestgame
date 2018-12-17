@@ -35,6 +35,7 @@ public class AStarGame extends Game<AStarPlayer> {
     public void playerWon(AStarPlayer player) {
         restartLevel();
         System.out.println("We won!");
+        System.out.println("Amount of moves: " + this.controller.moves.size());
     }
 
     @Override

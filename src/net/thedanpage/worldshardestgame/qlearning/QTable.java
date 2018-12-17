@@ -74,7 +74,7 @@ public class QTable {
             }
         }
 
-        if(bestQ == 0) return Move.RIGHT;
+        if(bestQ == 0) return explore();
 
         return bestMove;
     }
@@ -92,12 +92,7 @@ public class QTable {
         Move move = getBestAction(stateStr);
         float[] qValState = table.get(stateStr);
         float actionQ = qValState[move.ordinal()];
-        //System.out.println(Arrays.toString(qValues));
-        if (lastPosition.equals(getPlayerPosition(game)) && prevAction != Move.NEUTRAL) {
-            qValues[prevAction.ordinal()] = -1;
-        } else {
-            qValues[prevAction.ordinal()] = prevActionQ + gameConfigs.learningRate * (reward + (gameConfigs.gammaValue * actionQ) - prevActionQ);
-        }
+        qValues[prevAction.ordinal()] = prevActionQ + gameConfigs.learningRate * (reward + (gameConfigs.gammaValue * actionQ) - prevActionQ);
         table.put(prevState, qValues);
     }
 

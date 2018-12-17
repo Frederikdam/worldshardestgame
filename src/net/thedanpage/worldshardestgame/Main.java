@@ -24,10 +24,10 @@ public class Main {
 
     public static void main(String[] args) {
         var sound = false;
-        var test = false;
+        var test = true;
         var replay = true;
 
-        var game = createGame(Algorithm.ASTAR);
+        var game = createGame(Algorithm.QLEARNING);
 
         if (sound) MusicPlayer.play(BACKGROUND);
 
@@ -95,7 +95,7 @@ public class Main {
     }
 
     private static Game createGame(Algorithm algorithm) {
-        var levelNumber = 12;
+        var levelNumber = 1;
         var level = createLevels().get(levelNumber-1);
 
         switch(algorithm) {
@@ -104,7 +104,7 @@ public class Main {
                 var initialMoveCount = 5;
                 var mutationRate = 0.005;
                 Function<Integer, Integer> mutationChange = value -> {
-                    var newValue = value < 2000 ? value + 1 : value;
+                    var newValue = value < 2000 ? value + 4 : value;
                     return newValue;
                 };
 
