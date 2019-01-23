@@ -48,7 +48,16 @@ public class Dot {
 	/** True if the dot moves vertically, false if it moves horizontally. */
 	private boolean vertMovement;
 	
-	
+	public Dot(Dot clone) {
+		this.x = clone.x;
+		this.y = clone.y;
+		this.pos1 = clone.pos1;
+		this.pos2 = clone.pos2;
+		this.speed = clone.speed;
+		this.moveToPos1 = clone.moveToPos1;
+		this.vertMovement = clone.vertMovement;
+	}
+
 	public Dot(int x, int y, Point pos1, Point pos2, double speed, boolean moveToPos1, boolean vertMovement) {
 		this.x = x*40;
 		this.y = y*40;
@@ -58,7 +67,6 @@ public class Dot {
 		this.moveToPos1 = moveToPos1;
 		this.vertMovement = vertMovement;
 	}
-	
 	
 	public void draw(Graphics g) {
 		g.setColor(Color.BLACK);
@@ -87,7 +95,7 @@ public class Dot {
 	}
 	
 	public Ellipse2D getBounds() {
-		return new Ellipse2D.Double((this.x - 10) + 20 , (this.y - 10) + 20, 20, 20);
+		return new Ellipse2D.Double((this.x - 10) + 20 , (this.y - 10) + 20, 21, 21);
 	}
 	
 }

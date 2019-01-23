@@ -16,5 +16,3 @@
 
 Format: x-y-x1,y1-x2,y2-speed-moveto_pos1_first-move_vertically
 IMPORTANT: x2 > x1 or y2 > y1
-
-15 - 9 - 15,4 - 15,8 - 1 - false - true

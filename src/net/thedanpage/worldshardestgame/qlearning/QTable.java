@@ -16,6 +16,21 @@ public class QTable {
     String prevState;
     Move prevAction;
     String lastPosition = "";
+    int movesN = 0;
+    int moveRate = 0;
+    public int getMovesN() {
+        return movesN;
+    }
+    public void setMovesN(int movesN) {
+        this.movesN = movesN;
+    }
+    public int getMoveRate() {
+        return moveRate;
+    }
+    public void setMoveRate(int moveRate) {
+        this.moveRate = moveRate;
+    }
+
 
     public QTable(QLearningGameConfigs configs) {
         this.gameConfigs = configs;
@@ -59,7 +74,7 @@ public class QTable {
             }
         }
 
-        if(bestQ == 0) return Move.RIGHT;
+        if(bestQ == 0) return explore();
 
         return bestMove;
     }
@@ -77,19 +92,15 @@ public class QTable {
         Move move = getBestAction(stateStr);
         float[] qValState = table.get(stateStr);
         float actionQ = qValState[move.ordinal()];
-        //System.out.println(Arrays.toString(qValues));
-        if (lastPosition.equals(getPlayerPosition(game)) && prevAction != Move.NEUTRAL) {
-            qValues[prevAction.ordinal()] = -1;
-        } else {
-            qValues[prevAction.ordinal()] = gameConfigs.learningRate * (reward + (gameConfigs.gammaValue * actionQ) - prevActionQ);
-        }
+        qValues[prevAction.ordinal()] = prevActionQ + gameConfigs.learningRate * (reward + (gameConfigs.gammaValue * actionQ) - prevActionQ);
         table.put(prevState, qValues);
     }
 
     String getGameString(QLearningGame game){
         var gameString = "";
-        gameString += getPlayerPosition(game);
-        gameString += getEnemyPositions(game);
+        gameString += getPlayerPosition(game); // + ", " + getMoveRate();
+        //System.out.println(gameString);
+        //gameString += getEnemyPositions(game);
         return gameString;
     }
 

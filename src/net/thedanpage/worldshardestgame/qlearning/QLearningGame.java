@@ -11,6 +11,7 @@ public class QLearningGame extends Game<QLearningPlayer> {
 
     QTable qTable;
     int generation = 1;
+    double bestDistance = Double.MAX_VALUE;
 
     public QLearningGame(Controller controller, GameLevel level, QTable qTable) {
         super(controller, level);
@@ -37,7 +38,10 @@ public class QLearningGame extends Game<QLearningPlayer> {
     @Override
     public void playerDiedToEnemy(QLearningPlayer player) {
         var distanceToGoal = getLevel().getDistanceToGoal(player);
-        System.out.println(distanceToGoal);
+        System.out.println(bestDistance);
+        if (distanceToGoal < bestDistance) {
+            bestDistance = distanceToGoal;
+        }
     }
 
     @Override
@@ -52,5 +56,8 @@ public class QLearningGame extends Game<QLearningPlayer> {
 
     @Override
     public void playerWon(QLearningPlayer player) {
+        System.out.println("We won!");
+        getLevel().reset();
+        player.respawn(getLevel());
     }
 }

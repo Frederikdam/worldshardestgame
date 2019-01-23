@@ -1,5 +1,8 @@
 package net.thedanpage.worldshardestgame;
 
+import net.thedanpage.worldshardestgame.astar.AStarController;
+import net.thedanpage.worldshardestgame.astar.AStarGame;
+
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -64,6 +67,17 @@ public abstract class Game<T extends Player> extends JPanel implements ActionLis
         g.fillRect(0, 0, 800, 22);
         g.setColor(Color.WHITE);
         g.setFont(new Font("Tahoma", Font.BOLD, 18));
+        if (controller instanceof AStarController) {
+            level.drawGraph(g);
+            ((AStarController)controller).drawPath(g);
+        }
+        if (this instanceof AStarGame) {
+            ((AStarGame)this).trimmedGoals.forEach(goal -> {
+                g.setColor(Color.black);
+                g.fillRect(goal.x, goal.y, 1, 1);
+            });
+        }
+        g.fillRect(population.get(0).getPosition().x, population.get(0).getPosition().y, 1,1);
         var count = generationCount();
         drawRightJustifiedString(count > 0 ? "Generation: " + count : "", 750, 17, g);
         g.dispose();
@@ -83,7 +97,7 @@ public abstract class Game<T extends Player> extends JPanel implements ActionLis
         for(T player : population) {
             var nextMove = controller.getMove(this, player);
             advancePlayer(nextMove, getLevel(), player);
-            controller.didMove(this, player);
+            controller.didMove(this, player, nextMove);
             if(player.isDead()) {
                 deadPlayerCount++;
             }
@@ -149,5 +163,13 @@ public abstract class Game<T extends Player> extends JPanel implements ActionLis
         FontMetrics fm = g.getFontMetrics();
         int x = (w - fm.stringWidth(s));
         g.drawString(s, x, h);
+    }
+
+    public void restartLevel() {
+        getLevel().reset();
+
+        for(Player player : this.population) {
+            player.respawn(getLevel());
+        }
     }
 }

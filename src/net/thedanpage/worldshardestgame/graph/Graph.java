@@ -1,14 +1,21 @@
 package net.thedanpage.worldshardestgame.graph;
 
+import net.thedanpage.worldshardestgame.Dot;
+
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Graph {
-    public List<Node> nodes = new ArrayList<>();
+    public List<Node> nodes;
 
     //This data structure is provided in order to optimize lookup when building the graph
-    public Node[][] nodeArray = new Node[1000][1000];
+    public Node[][] nodeArray;
+
+    public Graph() {
+        this.nodes = new ArrayList<>();
+        this.nodeArray = new Node[1000][1000];
+    }
 
     public void addNode(Node node) {
         nodes.add(node);

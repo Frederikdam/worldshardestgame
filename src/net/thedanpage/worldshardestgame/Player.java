@@ -1,9 +1,6 @@
 package net.thedanpage.worldshardestgame;
 
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Rectangle;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Random;
@@ -53,9 +50,9 @@ public abstract class Player {
 
 	public void draw(Graphics g) {
 		g.setColor(new Color(0, 0, 0, (int) opacity));
-		g.fillRect(x - 15, y - 15 + 22, 28, 28);
+		g.fillRect(x - 14, y - 14 + 22, 28, 28);
 		g.setColor(new Color(255, 0, 0, (int) opacity));
-		g.fillRect(x-12, y-12 + 22,
+		g.fillRect(x-11, y-11 + 22,
 				   22, 22);
 	}
 
@@ -66,6 +63,10 @@ public abstract class Player {
 			}
 		}
 		return null;
+	}
+
+	public Point getPosition() {
+		return new Point(x, y+22);
 	}
 
 	public Tile getTile(GameLevel level) {
@@ -83,7 +84,7 @@ public abstract class Player {
 	}
 
 	public Rectangle getBounds() {
-		return new Rectangle(this.x - 15, this.y - 15, 28, 28);
+		return new Rectangle(this.x - 14, this.y - 14, 28, 28);
 	}
 
 	public void respawn(GameLevel level) {
@@ -92,53 +93,53 @@ public abstract class Player {
 		this.deadByDot = false;
 		this.opacity = 255;
 		this.x = level.getSpawnPoint().x;
-		this.y = level.getSpawnPoint().y;
+		this.y = level.getSpawnPoint().y+22;
 		if (level.coins != null) {
 			for (Coin coin : level.coins) coin.collected = false;
 		}
 	}
 
 	boolean checkCollisionUp(GameLevel level) {
-		if (getRelativeTile(level, this.x - 14, this.y + 24, 0, -1) != null &&
-				getRelativeTile(level, this.x - 14, this.y + 24, 0, -1).getType() == 0 ||
-				getRelativeTile(level, this.x + 15, this.y + 24, 0, -1) != null &&
-						getRelativeTile(level, this.x + 15, this.y + 24, 0, -1).getType() == 0) {
+		if (getRelativeTile(level, this.x - 14, this.y + 25, 0, -1) != null &&
+				getRelativeTile(level, this.x - 14, this.y + 25, 0, -1).getType() == 0 ||
+				getRelativeTile(level, this.x + 14, this.y + 25, 0, -1) != null &&
+						getRelativeTile(level, this.x + 14, this.y + 25, 0, -1).getType() == 0) {
 			return true;
 		}
 		return false;
 	}
 
 	boolean checkCollisionDown(GameLevel level) {
-		if (getRelativeTile(level, this.x - 14, this.y - 27, 0, 1) != null &&
-				getRelativeTile(level, this.x - 14, this.y - 27, 0, 1).getType() == 0 ||
-				getRelativeTile(level, this.x + 15, this.y - 27, 0, 1) != null &&
-						getRelativeTile(level, this.x + 15, this.y - 27, 0, 1).getType() == 0) {
+		if (getRelativeTile(level, this.x - 14, this.y - 28, 0, 1) != null &&
+				getRelativeTile(level, this.x - 14, this.y - 28, 0, 1).getType() == 0 ||
+				getRelativeTile(level, this.x + 14, this.y - 28, 0, 1) != null &&
+						getRelativeTile(level, this.x + 14, this.y - 28, 0, 1).getType() == 0) {
 			return true;
 		}
 		return false;
 	}
 
 	boolean checkCollisionLeft(GameLevel level) {
-		if (getRelativeTile(level, this.x + 24, this.y - 15, -1, 0) != null &&
-				getRelativeTile(level, this.x + 24, this.y - 15, -1, 0).getType() == 0 ||
-				getRelativeTile(level, this.x + 24, this.y + 14, -1, 0) != null &&
-						getRelativeTile(level, this.x + 24, this.y + 14, -1, 0).getType() == 0) {
+		if (getRelativeTile(level, this.x + 25, this.y - 14, -1, 0) != null &&
+				getRelativeTile(level, this.x + 25, this.y - 14, -1, 0).getType() == 0 ||
+				getRelativeTile(level, this.x + 25, this.y + 14, -1, 0) != null &&
+						getRelativeTile(level, this.x + 25, this.y + 14, -1, 0).getType() == 0) {
 			return true;
 		}
 		return false;
 	}
 
 	boolean checkCollisionRight(GameLevel level) {
-		if (getRelativeTile(level, this.x - 27, this.y - 15, 1, 0) != null &&
-				getRelativeTile(level, this.x - 27, this.y - 15, 1, 0).getType() == 0 ||
-				getRelativeTile(level, this.x - 27, this.y + 15, 1, 0) != null &&
-						getRelativeTile(level, this.x - 27, this.y + 15, 1, 0).getType() == 0) {
+		if (getRelativeTile(level, this.x - 28, this.y - 14, 1, 0) != null &&
+				getRelativeTile(level, this.x - 28, this.y - 14, 1, 0).getType() == 0 ||
+				getRelativeTile(level, this.x - 28, this.y + 14, 1, 0) != null &&
+						getRelativeTile(level, this.x - 28, this.y + 14, 1, 0).getType() == 0) {
 			return true;
 		}
 		return false;
 	}
 
-	boolean collidesWith(Shape other) {
+	public boolean collidesWith(Shape other) {
 		return this.getBounds().getBounds2D().intersects(other.getBounds2D());
 	}
 

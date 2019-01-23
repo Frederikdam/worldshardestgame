@@ -1,5 +1,7 @@
 package net.thedanpage.worldshardestgame;
 
+import net.thedanpage.worldshardestgame.astar.AStarController;
+import net.thedanpage.worldshardestgame.astar.AStarGame;
 import net.thedanpage.worldshardestgame.genetic.GeneticController;
 import net.thedanpage.worldshardestgame.genetic.GeneticGame;
 import net.thedanpage.worldshardestgame.genetic.GeneticGameConfigs;
@@ -10,6 +12,8 @@ import net.thedanpage.worldshardestgame.qlearning.QLearningController;
 import net.thedanpage.worldshardestgame.qlearning.QLearningGame;
 import net.thedanpage.worldshardestgame.qlearning.QLearningGameConfigs;
 import net.thedanpage.worldshardestgame.qlearning.QTable;
+import net.thedanpage.worldshardestgame.replay.ReplayController;
+import net.thedanpage.worldshardestgame.replay.ReplayGame;
 
 import java.util.ArrayList;
 import java.util.function.Function;
@@ -23,7 +27,7 @@ public class Main {
         var test = true;
         var replay = true;
 
-        var game = createGame(Algorithm.ASTAR);
+        var game = createGame(Algorithm.QLEARNING);
 
         if (sound) MusicPlayer.play(BACKGROUND);
 
@@ -43,13 +47,28 @@ public class Main {
         while(!game.goalReached) {
             game.advanceGame();
         }
-        if(replay) { render(game); }
+        if(replay) {
+            if (game instanceof GeneticGame) {
+                render(game);
+                return;
+            }
+
+            var replayGame = createReplayFromGame(game);
+            render(replayGame);
+        }
     }
 
-    private static void render(Game game) {
+    private static Game createReplayFromGame(Game game) {
+        var replayController = new ReplayController();
+        replayController.moves = game.controller.moves;
+        return new ReplayGame(replayController, game.getLevel());
+    }
+
+    private static Frame render(Game game) {
         var frame = new Frame();
         frame.add(game);
         frame.setVisible(true);
+        return frame;
     }
 
     private static boolean levelExists(int levelNumber) {
@@ -76,16 +95,16 @@ public class Main {
     }
 
     private static Game createGame(Algorithm algorithm) {
-        var levelNumber = 2;
+        var levelNumber = 1;
         var level = createLevels().get(levelNumber-1);
 
         switch(algorithm) {
             case GENETIC:
-                var populationSize = 100;
+                var populationSize = 200;
                 var initialMoveCount = 5;
                 var mutationRate = 0.005;
                 Function<Integer, Integer> mutationChange = value -> {
-                    var newValue = value < 5000 ? value + 4 : value;
+                    var newValue = value < 2000 ? value + 4 : value;
                     return newValue;
                 };
 
@@ -100,18 +119,18 @@ public class Main {
                 return humanGame;
             case QLEARNING:
                 int actionRange = Move.values().length;
-                float explorationChance=0.2f;
-                float gammaValue=0.1f;
-                float learningRate=0.6f;
+                float explorationChance=0.05f;
+                float gammaValue=0.05f;
+                float learningRate=1f;
                 var qLearningGameConfigs = new QLearningGameConfigs(actionRange, explorationChance, gammaValue, learningRate);
                 var qTable = new QTable(qLearningGameConfigs);
                 var qLearningController = new QLearningController(qTable);
                 var qLearningGame = new QLearningGame(qLearningController, level, qTable);
                 return qLearningGame;
             case ASTAR:
-                level.buildGraph();
-                level.removeDotsFromGraph();
-                return new HumanGame(new HumanController(), level);
+                var aStarController = new AStarController();
+                var aStarGame = new AStarGame(aStarController, level);
+                return aStarGame;
         }
 
         return null;
